@@ -1,0 +1,90 @@
+use std::path::Path;
+
+use colored::Colorize;
+use crate::tools::socket::Socket;
+
+pub fn print_table_line(widths: &[usize]) {
+    let line_string: String = widths
+        .iter()
+        .map(|w| format!("+{}", "-".repeat(*w)))
+        .collect::<String>() + "+";
+    println!("{}", line_string);
+}
+
+fn ansi_hyperlink(text: &str, url: Option<&str>, width: usize) -> String {
+    match url {
+        Some(u) => {
+            let path = u.replace("\\", "/");
+            let path_to_executable_folder = Path::new(&path);
+            let padding = " ".repeat(std::cmp::max(width -text.len(), 0));
+            if let Some(parent) = path_to_executable_folder.parent() {
+                let parent_folder_str = parent.display().to_string();
+                format!("{}\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", padding, parent_folder_str, text)
+            } else {
+                format!("{}\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", padding, u, text)
+            }
+        }
+        None => {
+            text.to_string()
+        }
+    }
+}
+
+pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
+    let port_str = format!("{}:{}", socket.port, socket.remote_port.unwrap_or(0));
+    let remote_addr = socket.remote_addr.as_deref().unwrap_or("-");
+    let protocol_string = match socket.protocol {
+        "UDP" => {
+            "UDP/IP".bold().blue()
+        }
+        "TCP" => {
+            "TCP/IP".bold().green()
+        }
+        _ => {
+            "unknown".bold().red()
+        }
+    };
+    let socket_row_str = format!("{:^pid_w$}|{:^port_w$}|{:>process_name_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}",
+        socket.pid, 
+        port_str, 
+        ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[2]).bold(),
+        protocol_string,
+        socket.local_addr,
+        remote_addr,
+        socket.state,
+        pid_w = widths[0],
+        port_w = widths[1],
+        process_name_w = widths[2],
+        proto_w = widths[3],
+        local_addr_w = widths[4],
+        remote_addr_w = widths[5],
+        state_w = widths[6]
+    );
+    if index %2==0 {
+        println!("|{}|", socket_row_str.on_black());
+    } else {
+        println!("|{}|", socket_row_str);
+    }
+}
+
+pub fn print_socket_table_header(widths: &[usize]) {
+    print_table_line(widths);
+    println!(
+        "|{:^pid_w$}|{:^port_w$}|{:^process_name_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|",
+        "PID".bold(),
+        "Port".bold(),
+        "Process Name".bold(),
+        "Protocol".bold(),
+        "Local Address".bold(),
+        "Remote Address".bold(),
+        "State".bold(),
+        pid_w = widths[0],
+        port_w = widths[1],
+        process_name_w = widths[2],
+        proto_w = widths[3],
+        local_addr_w = widths[4],
+        remote_addr_w = widths[5],
+        state_w = widths[6]
+    );
+    print_table_line(widths);
+}

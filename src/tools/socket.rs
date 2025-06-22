@@ -1,0 +1,301 @@
+use std::{collections::HashMap, ffi::{OsStr, OsString}, fmt::{Display, Formatter}, os::windows::ffi::{OsStrExt, OsStringExt}, sync::LazyLock};
+use windows::{core::PCWSTR, Win32::{
+        Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, GetExtendedUdpTable, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL, UDP_TABLE_OWNER_MODULE}, Networking::WinSock::{AF_INET, AF_INET6}, Storage::FileSystem::QueryDosDeviceW, System::{
+            ProcessStatus::GetProcessImageFileNameW,
+            Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ},
+        }
+    }};
+use std::{net::Ipv4Addr};
+use std::{ffi::c_void, ptr};
+use colored::*;
+use crate::tools::print::*;
+
+//--------------------------------------------------------------------------------------------------------------------------
+
+pub struct Socket {
+    pub process_name: String,
+    pub pid: u32,
+    pub port: u16,
+    pub protocol: &'static str,
+    pub local_addr: String,
+    pub remote_addr: Option<String>,
+    pub remote_port: Option<u16>,
+    pub state: ColoredString,
+    pub executable_path: Option<String>
+}
+
+pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
+pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
+
+impl Socket {
+    pub fn print_socket_table(socket_table: &Vec<Socket>) {
+        let mut largest_file_name: usize = 0;
+        for socket in socket_table {
+            if socket.process_name.len() > largest_file_name{
+                largest_file_name = socket.process_name.len();
+            }
+        }
+        let pid_w = 10;
+        let port_w = 14;
+        let process_name_w = std::cmp::max(largest_file_name + 4, 12);
+        let proto_w = 10;
+        let local_addr_w = 17;
+        let remote_addr_w = 17;
+        let state_w  = 15;
+        let widths = [pid_w, port_w, process_name_w, proto_w, local_addr_w, remote_addr_w, state_w];
+        print_socket_table_header(&widths);
+        for (i, socket) in socket_table.iter().enumerate() {
+            print_socket_row(socket, &widths, i);
+        }
+        print_table_line(&widths);
+    }
+}
+
+impl Display for Socket {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        let protocol_string = match self.protocol {
+            "TCP" => "TCP".bold().blue(),
+            "UDP" => "UDP".bold().green(),
+            _ => "unknown".bold().red()
+        };
+
+        write!(f, "-------------------\nPID: {}\nProcess Name: {}\nPort: {}:{}\nProtocol: {}\nAddress: {}:{}",
+            self.pid.to_string().bold(),
+            self.process_name.bold().underline(),
+            self.port, self.remote_port.unwrap_or(0),
+            protocol_string,
+            self.local_addr, self.remote_addr.as_deref().unwrap_or("")
+        )?;
+        Ok(())
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------
+
+fn map_tcp_state(state: u32) -> ColoredString {
+    match state {
+        1 => "CLOSED".red(),
+        2 => "LISTEN".cyan(),
+        3 => "SYN_SENT".white(),
+        4 => "SYN_RCVD".white(),
+        5 => "ESTABLISHED".green(),
+        6 => "FIN_WAIT1".white(),
+        7 => "FIN_WAIT2".white(),
+        8 => "CLOSE_WAIT".yellow(),
+        9 => "CLOSING".red(),
+        10 => "LAST_ACK".white(),
+        11 => "TIME_WAIT".white(),
+        12 => "DELETE_TCB".white(),
+        _ => "UNKNOWN".purple(),
+    }
+}
+
+static NT_TO_DOS_MAP: LazyLock<HashMap<String, String>> = LazyLock::new(|| {
+    let mut map: HashMap<String, String> = HashMap::new();
+    for drive_letter in b'A'..=b'Z' {
+        let drive = format!("{}:", drive_letter as char);
+        let mut device_path_buf = [0u16; 512];
+        let drive_wide: Vec<u16> = OsStr::new(&drive)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+
+        let len = unsafe {
+            QueryDosDeviceW(
+                PCWSTR(drive_wide.as_ptr()),
+                Some(&mut device_path_buf)
+            )
+        };
+
+        if len == 0 {
+            continue;
+        }
+
+        let mut dos_path = OsString::from_wide(&device_path_buf[..len as usize])
+            .to_string_lossy()
+            .to_string();
+        dos_path = dos_path.trim_end_matches('\0').to_string();
+        
+        map.insert(dos_path, drive);
+    }
+    map
+});
+
+pub fn get_nt_to_dos_map(map: &mut std::collections::HashMap<String, String>) {
+    for drive_letter in b'A'..=b'Z' {
+        let drive = format!("{}:", drive_letter as char);
+        let mut device_path_buf = [0u16; 512];
+        let drive_wide: Vec<u16> = OsStr::new(&drive)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+
+        let len = unsafe {
+            QueryDosDeviceW(
+                PCWSTR(drive_wide.as_ptr()),
+                Some(&mut device_path_buf)
+            )
+        };
+
+        if len == 0 {
+            continue;
+        }
+
+        let mut drive_path = OsString::from_wide(&device_path_buf[..len as usize])
+            .to_string_lossy()
+            .to_string();
+        drive_path = drive_path.trim_end_matches('\0').to_string();
+        
+        map.insert(drive_path, drive);
+    }
+}
+
+fn to_dos_path(nt_path: &str) -> Option<String> {
+    let nt_drive = nt_path.split("\\").take(3).collect::<Vec<_>>().join("\\");
+    match NT_TO_DOS_MAP.get(&nt_drive).cloned() {
+        Some(dos_path) => {
+            Some(nt_path.replacen(nt_drive.as_str(), &dos_path, 1))
+        }
+        None => {
+            None
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------
+
+pub fn get_udp_sockets(ulaf: u32) -> Vec<Socket> {
+    let mut udp_sockets: Vec<Socket> = Vec::new();
+
+    let mut table_size = 0;
+    let result = unsafe {
+        GetExtendedUdpTable(
+            Some(ptr::null_mut() as *mut c_void),
+            &mut table_size,
+            false,
+            ulaf,
+            UDP_TABLE_OWNER_MODULE,
+            0,
+        )
+    };
+
+    if result != NO_ERROR.0 {
+        if result == windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER.0 {
+            let mut buffer = vec![0u8; table_size as usize];
+            let final_result = unsafe {
+                GetExtendedUdpTable(
+                    Some(buffer.as_mut_ptr() as *mut c_void),
+                    &mut table_size,
+                    false,
+                    ulaf,
+                    UDP_TABLE_OWNER_MODULE,
+                    0,
+                )
+            };
+
+            if final_result == windows::Win32::Foundation::NO_ERROR.0 {
+                let table_ptr = buffer.as_ptr() as *const MIB_UDPTABLE_OWNER_MODULE;
+                let num_entries = unsafe { (*table_ptr).dwNumEntries };
+                let row_ptr = unsafe { &((*table_ptr).table) as *const MIB_UDPROW_OWNER_MODULE };
+
+                for i in 0..num_entries {
+                    let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
+                        Ok(handle) => {
+                            let mut path_buffer= [0u16; 260];
+                            let length =  unsafe { GetProcessImageFileNameW(handle, &mut path_buffer) };
+                            if length > 0 {
+                                let path = String::from_utf16_lossy(&path_buffer[..length as usize]);
+                                udp_sockets.push(
+                                    Socket {
+                                        process_name: path.split("\\").last().unwrap_or("unknown").trim().to_string(),
+                                        pid: row.dwOwningPid,
+                                        port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                        protocol: "UDP",
+                                        remote_addr: None,
+                                        local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
+                                        remote_port: None,
+                                        state: "-".white(),
+                                        executable_path: to_dos_path(&path)
+                                    }
+                                );
+                            }
+                            unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
+                        }
+                        Err(_) => {}
+                    } 
+                }
+            } 
+        }
+    }
+    udp_sockets
+}
+
+pub fn get_tcp_sockets(ulaf: u32) -> Vec<Socket> {
+    let mut tcp_sockets: Vec<Socket> = Vec::new();
+
+    let mut table_size = 0;
+    let result = unsafe {
+        GetExtendedTcpTable(
+            Some(ptr::null_mut() as *mut c_void),
+            &mut table_size,
+            false,
+            ulaf,
+            TCP_TABLE_OWNER_MODULE_ALL,
+            0,
+        )
+    };
+
+    if result != NO_ERROR.0 {
+        if result == windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER.0 {
+            let mut buffer = vec![0u8; table_size as usize];
+            let final_result = unsafe {
+                GetExtendedTcpTable(
+                    Some(buffer.as_mut_ptr() as *mut c_void),
+                    &mut table_size,
+                    false,
+                    ulaf,
+                    TCP_TABLE_OWNER_MODULE_ALL,
+                    0,
+                )
+            };
+
+            if final_result == windows::Win32::Foundation::NO_ERROR.0 {
+                let table_ptr = buffer.as_ptr() as *const MIB_TCPTABLE_OWNER_MODULE;
+                let num_entries = unsafe { (*table_ptr).dwNumEntries };
+                let row_ptr = unsafe { &((*table_ptr).table) as *const MIB_TCPROW_OWNER_MODULE };
+
+                for i in 0..num_entries {
+                    let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
+                        Ok(handle) => {
+                            let mut path_buffer= [0u16; 260];
+                            let length = unsafe { GetProcessImageFileNameW(handle, &mut path_buffer) };
+                            if length > 0 {
+                                let path = String::from_utf16_lossy(&path_buffer[..length as usize]);
+                                tcp_sockets.push(
+                                    Socket {
+                                        process_name: path.split("\\").last().unwrap_or("unknown").trim().to_string(),
+                                        pid: row.dwOwningPid,
+                                        port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                        protocol: "TCP",
+                                        remote_addr: Some(Ipv4Addr::from(row.dwRemoteAddr.to_be()).to_string()),
+                                        local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
+                                        remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
+                                        state: map_tcp_state(row.dwState),
+                                        executable_path: to_dos_path(&path)
+                                    }
+                                );
+                            }
+                            unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
+                        }
+                        Err(_) => {}
+                    } 
+                }
+            }
+        } 
+    }
+    tcp_sockets
+}
+
+//--------------------------------------------------------------------------------------------------------------------------
