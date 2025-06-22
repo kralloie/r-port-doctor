@@ -1,14 +1,14 @@
-use std::{collections::HashMap, ffi::{OsStr, OsString}, fmt::{Display, Formatter}, os::windows::ffi::{OsStrExt, OsStringExt}, sync::LazyLock};
-use windows::{core::PCWSTR, Win32::{
-        Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, GetExtendedUdpTable, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL, UDP_TABLE_OWNER_MODULE}, Networking::WinSock::{AF_INET, AF_INET6}, Storage::FileSystem::QueryDosDeviceW, System::{
+use std::fmt::{Display, Formatter};
+use windows::Win32::{
+        Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, GetExtendedUdpTable, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL, UDP_TABLE_OWNER_MODULE}, Networking::WinSock::{AF_INET, AF_INET6}, System::{
             ProcessStatus::GetProcessImageFileNameW,
             Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ},
         }
-    }};
+    };
 use std::{net::Ipv4Addr};
 use std::{ffi::c_void, ptr};
 use colored::*;
-use crate::tools::print::*;
+use crate::tools::{nt_to_dos::to_dos_path, print::*};
 
 //--------------------------------------------------------------------------------------------------------------------------
 
@@ -87,78 +87,6 @@ fn map_tcp_state(state: u32) -> ColoredString {
         11 => "TIME_WAIT".white(),
         12 => "DELETE_TCB".white(),
         _ => "UNKNOWN".purple(),
-    }
-}
-
-static NT_TO_DOS_MAP: LazyLock<HashMap<String, String>> = LazyLock::new(|| {
-    let mut map: HashMap<String, String> = HashMap::new();
-    for drive_letter in b'A'..=b'Z' {
-        let drive = format!("{}:", drive_letter as char);
-        let mut device_path_buf = [0u16; 512];
-        let drive_wide: Vec<u16> = OsStr::new(&drive)
-            .encode_wide()
-            .chain(std::iter::once(0))
-            .collect();
-
-        let len = unsafe {
-            QueryDosDeviceW(
-                PCWSTR(drive_wide.as_ptr()),
-                Some(&mut device_path_buf)
-            )
-        };
-
-        if len == 0 {
-            continue;
-        }
-
-        let mut dos_path = OsString::from_wide(&device_path_buf[..len as usize])
-            .to_string_lossy()
-            .to_string();
-        dos_path = dos_path.trim_end_matches('\0').to_string();
-        
-        map.insert(dos_path, drive);
-    }
-    map
-});
-
-pub fn get_nt_to_dos_map(map: &mut std::collections::HashMap<String, String>) {
-    for drive_letter in b'A'..=b'Z' {
-        let drive = format!("{}:", drive_letter as char);
-        let mut device_path_buf = [0u16; 512];
-        let drive_wide: Vec<u16> = OsStr::new(&drive)
-            .encode_wide()
-            .chain(std::iter::once(0))
-            .collect();
-
-        let len = unsafe {
-            QueryDosDeviceW(
-                PCWSTR(drive_wide.as_ptr()),
-                Some(&mut device_path_buf)
-            )
-        };
-
-        if len == 0 {
-            continue;
-        }
-
-        let mut drive_path = OsString::from_wide(&device_path_buf[..len as usize])
-            .to_string_lossy()
-            .to_string();
-        drive_path = drive_path.trim_end_matches('\0').to_string();
-        
-        map.insert(drive_path, drive);
-    }
-}
-
-fn to_dos_path(nt_path: &str) -> Option<String> {
-    let nt_drive = nt_path.split("\\").take(3).collect::<Vec<_>>().join("\\");
-    match NT_TO_DOS_MAP.get(&nt_drive).cloned() {
-        Some(dos_path) => {
-            Some(nt_path.replacen(nt_drive.as_str(), &dos_path, 1))
-        }
-        None => {
-            None
-        }
     }
 }
 
