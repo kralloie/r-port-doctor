@@ -37,7 +37,7 @@ fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
         filter_count = filter_count + (socket.protocol.to_lowercase() == m.to_lowercase()) as usize;
     }
 
-    if let Some(n) = args.processname.clone() {
+    if let Some(n) = args.process_name.clone() {
         filter_count = filter_count + (socket.process_name.to_lowercase().contains(n.to_lowercase().as_str())) as usize;
     }
 

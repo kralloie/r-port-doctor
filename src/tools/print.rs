@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use colored::Colorize;
+use colored::{ColoredString, Colorize};
 use crate::tools::socket::Socket;
 
 pub fn print_table_line(widths: &[usize]) {
@@ -30,6 +30,25 @@ fn ansi_hyperlink(text: &str, url: Option<&str>, width: usize) -> String {
     }
 }
 
+fn map_state_color(state: &String) -> ColoredString{
+    match state.as_str() {
+        "CLOSED" => state.red(),
+        "LISTEN" => state.cyan(),
+        "SYN_SENT" => state.white(),
+        "SYN_RCVD" => state.white(),
+        "ESTABLISHED"=> state.green(),
+        "FIN_WAIT1" => state.white(),
+        "FIN_WAIT2" => state.white(),
+        "CLOSE_WAIT" => state.yellow(),
+        "CLOSING" => state.yellow(),
+        "LAST_ACK" => state.white(),
+        "TIME_WAIT" => state.white(),
+        "DELETE_TCB" => state.white(),
+        "UNKNOWN" => state.purple(),
+        _ => "-".purple()
+    }
+}
+
 pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
     let port_str = format!("{}:{}", socket.port, socket.remote_port.unwrap_or(0));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or("-");
@@ -51,7 +70,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         protocol_string,
         socket.local_addr,
         remote_addr,
-        socket.state,
+        map_state_color(&socket.state),
         pid_w = widths[0],
         process_name_w = widths[1],
         port_w = widths[2],
