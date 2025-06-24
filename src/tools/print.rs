@@ -16,7 +16,7 @@ fn ansi_hyperlink(text: &str, url: Option<&str>, width: usize) -> String {
         Some(u) => {
             let path = u.replace("\\", "/");
             let path_to_executable_folder = Path::new(&path);
-            let padding = " ".repeat(std::cmp::max(width -text.len(), 0));
+            let padding = " ".repeat(std::cmp::max(width - text.len(), 0));
             if let Some(parent) = path_to_executable_folder.parent() {
                 let parent_folder_str = parent.display().to_string();
                 format!("{}\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", padding, parent_folder_str, text)
@@ -44,17 +44,17 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
             "unknown".bold().red()
         }
     };
-    let socket_row_str = format!("{:^pid_w$}|{:^port_w$}|{:>process_name_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}",
-        socket.pid, 
+    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}",
+        socket.pid,
+        ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold(), 
         port_str, 
-        ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[2]).bold(),
         protocol_string,
         socket.local_addr,
         remote_addr,
         socket.state,
         pid_w = widths[0],
-        port_w = widths[1],
-        process_name_w = widths[2],
+        process_name_w = widths[1],
+        port_w = widths[2],
         proto_w = widths[3],
         local_addr_w = widths[4],
         remote_addr_w = widths[5],
@@ -70,17 +70,17 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
 pub fn print_socket_table_header(widths: &[usize]) {
     print_table_line(widths);
     println!(
-        "|{:^pid_w$}|{:^port_w$}|{:^process_name_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|",
+        "|{:^pid_w$}|{:^process_name_w$}|{:^port_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|",
         "PID".bold(),
-        "Port".bold(),
         "Process Name".bold(),
+        "Port".bold(),
         "Protocol".bold(),
         "Local Address".bold(),
         "Remote Address".bold(),
         "State".bold(),
         pid_w = widths[0],
-        port_w = widths[1],
-        process_name_w = widths[2],
+        process_name_w = widths[1],
+        port_w = widths[2],
         proto_w = widths[3],
         local_addr_w = widths[4],
         remote_addr_w = widths[5],
