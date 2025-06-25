@@ -15,7 +15,7 @@ fn main() {
     let mut sockets: Vec<socket::Socket>;
     match &args.ip_version {
         Some(version) => {
-            if version.to_lowercase() == "ipv6" {
+            if *version == 6 {
                 sockets = get_tcp_sockets_ipv6();
                 sockets.extend(get_udp_sockets_ipv6());
             } else {
