@@ -1,6 +1,8 @@
 use clap::Parser;
 use r_port_doctor::tools::args::Args;
-use r_port_doctor::tools::socket::{self, get_tcp_sockets, get_tcp_sockets_ipv6, get_udp_sockets, get_udp_sockets_ipv6};
+use r_port_doctor::tools::socket::{self};
+use r_port_doctor::tools::tcp_table::{get_tcp_sockets, get_tcp_sockets_ipv6};
+use r_port_doctor::tools::udp_table::{get_udp_sockets, get_udp_sockets_ipv6};
 fn main() {     
     let args = match Args::try_parse() {
         Ok(args) => args,
