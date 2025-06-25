@@ -1,7 +1,7 @@
 use clap::{arg, Parser};
 
 #[derive(Parser, Debug)]
-#[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool", ignore_errors = true)]
+#[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool")]
 pub struct Args {
     #[arg(short = 'p', long, help = "Filter by local port")]
     pub port: Option<u16>,
