@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
+use std::{fmt::{Display, Formatter}, net::Ipv6Addr};
 use windows::Win32::{
-        Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, GetExtendedUdpTable, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL, UDP_TABLE_OWNER_MODULE}, Networking::WinSock::{AF_INET, AF_INET6}, System::{
+        Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, GetExtendedUdpTable, MIB_TCP6ROW_OWNER_MODULE, MIB_TCP6TABLE_OWNER_MODULE, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, MIB_UDP6ROW_OWNER_MODULE, MIB_UDP6TABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL, UDP_TABLE_OWNER_MODULE}, Networking::WinSock::{AF_INET, AF_INET6}, System::{
             ProcessStatus::GetProcessImageFileNameW,
             Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ},
         }
@@ -57,17 +57,29 @@ impl Socket {
         let mut printable_table = socket_table;
         let filtered_table: Vec<Socket>;
         let mut largest_file_name: usize = 0;
+        let mut largest_local_addr: usize = 0;
+        let mut largest_remote_addr: usize = 0;
         for socket in socket_table {
             if socket.process_name.len() > largest_file_name{
                 largest_file_name = socket.process_name.len();
             }
+
+            if socket.local_addr.len() > largest_local_addr {
+                largest_local_addr = socket.local_addr.len();
+            }
+
+            if let Some(addr) = &socket.remote_addr {
+                if addr.len() > largest_remote_addr {
+                    largest_remote_addr = addr.len();
+                }
+            }
         }
         let pid_w = 10;
         let port_w = 14;
-        let process_name_w = std::cmp::max(largest_file_name + 4, 12);
+        let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
         let proto_w = 10;
-        let local_addr_w = 17;
-        let remote_addr_w = 17;
+        let local_addr_w = std::cmp::max(largest_local_addr + 2, 17); // + 2 for some extra padding
+        let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
         let state_w  = 15;
         let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w];
         print_socket_table_header(&widths);
@@ -123,7 +135,7 @@ fn map_tcp_state(state: u32) -> String {
 
 //--------------------------------------------------------------------------------------------------------------------------
 
-pub fn get_udp_sockets(ulaf: u32) -> Vec<Socket> {
+pub fn get_udp_sockets() -> Vec<Socket> {
     let mut udp_sockets: Vec<Socket> = Vec::new();
 
     let mut table_size = 0;
@@ -132,7 +144,7 @@ pub fn get_udp_sockets(ulaf: u32) -> Vec<Socket> {
             Some(ptr::null_mut() as *mut c_void),
             &mut table_size,
             false,
-            ulaf,
+            IPV4_ULAF,
             UDP_TABLE_OWNER_MODULE,
             0,
         )
@@ -146,7 +158,7 @@ pub fn get_udp_sockets(ulaf: u32) -> Vec<Socket> {
                     Some(buffer.as_mut_ptr() as *mut c_void),
                     &mut table_size,
                     false,
-                    ulaf,
+                    IPV4_ULAF,
                     UDP_TABLE_OWNER_MODULE,
                     0,
                 )
@@ -190,7 +202,74 @@ pub fn get_udp_sockets(ulaf: u32) -> Vec<Socket> {
     udp_sockets
 }
 
-pub fn get_tcp_sockets(ulaf: u32) -> Vec<Socket> {
+pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
+    let mut udp_sockets: Vec<Socket> = Vec::new();
+
+    let mut table_size = 0;
+    let result = unsafe {
+        GetExtendedUdpTable(
+            Some(ptr::null_mut() as *mut c_void),
+            &mut table_size,
+            false,
+            IPV6_ULAF,
+            UDP_TABLE_OWNER_MODULE,
+            0,
+        )
+    };
+
+    if result != NO_ERROR.0 {
+        if result == windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER.0 {
+            let mut buffer = vec![0u8; table_size as usize];
+            let final_result = unsafe {
+                GetExtendedUdpTable(
+                    Some(buffer.as_mut_ptr() as *mut c_void),
+                    &mut table_size,
+                    false,
+                    IPV6_ULAF,
+                    UDP_TABLE_OWNER_MODULE,
+                    0,
+                )
+            };
+
+            if final_result == windows::Win32::Foundation::NO_ERROR.0 {
+                let table_ptr = buffer.as_ptr() as *const MIB_UDP6TABLE_OWNER_MODULE;
+                let num_entries = unsafe { (*table_ptr).dwNumEntries };
+                let row_ptr = unsafe { &((*table_ptr).table) as *const MIB_UDP6ROW_OWNER_MODULE };
+
+                for i in 0..num_entries {
+                    let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
+                        Ok(handle) => {
+                            let mut path_buffer= [0u16; 260];
+                            let length =  unsafe { GetProcessImageFileNameW(handle, &mut path_buffer) };
+                            if length > 0 {
+                                let path = String::from_utf16_lossy(&path_buffer[..length as usize]);
+                                udp_sockets.push(
+                                    Socket {
+                                        process_name: path.split("\\").last().unwrap_or("unknown").trim().to_string(),
+                                        pid: row.dwOwningPid,
+                                        port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                        protocol: "UDP",
+                                        remote_addr: None,
+                                        local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
+                                        remote_port: None,
+                                        state: "-".to_string(),
+                                        executable_path: to_dos_path(&path)
+                                    }
+                                );
+                            }
+                            unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
+                        }
+                        Err(_) => {}
+                    } 
+                }
+            } 
+        }
+    }
+    udp_sockets
+}
+
+pub fn get_tcp_sockets() -> Vec<Socket> {
     let mut tcp_sockets: Vec<Socket> = Vec::new();
 
     let mut table_size = 0;
@@ -199,7 +278,7 @@ pub fn get_tcp_sockets(ulaf: u32) -> Vec<Socket> {
             Some(ptr::null_mut() as *mut c_void),
             &mut table_size,
             false,
-            ulaf,
+            IPV4_ULAF,
             TCP_TABLE_OWNER_MODULE_ALL,
             0,
         )
@@ -213,7 +292,7 @@ pub fn get_tcp_sockets(ulaf: u32) -> Vec<Socket> {
                     Some(buffer.as_mut_ptr() as *mut c_void),
                     &mut table_size,
                     false,
-                    ulaf,
+                    IPV4_ULAF,
                     TCP_TABLE_OWNER_MODULE_ALL,
                     0,
                 )
@@ -256,5 +335,73 @@ pub fn get_tcp_sockets(ulaf: u32) -> Vec<Socket> {
     }
     tcp_sockets
 }
+
+pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
+    let mut tcp_sockets: Vec<Socket> = Vec::new();
+
+    let mut table_size = 0;
+    let result = unsafe {
+        GetExtendedTcpTable(
+            Some(ptr::null_mut() as *mut c_void),
+            &mut table_size,
+            false,
+            IPV6_ULAF,
+            TCP_TABLE_OWNER_MODULE_ALL,
+            0,
+        )
+    };
+
+    if result != NO_ERROR.0 {
+        if result == windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER.0 {
+            let mut buffer = vec![0u8; table_size as usize];
+            let final_result = unsafe {
+                GetExtendedTcpTable(
+                    Some(buffer.as_mut_ptr() as *mut c_void),
+                    &mut table_size,
+                    false,
+                    IPV6_ULAF,
+                    TCP_TABLE_OWNER_MODULE_ALL,
+                    0,
+                )
+            };
+
+            if final_result == windows::Win32::Foundation::NO_ERROR.0 {
+                let table_ptr = buffer.as_ptr() as *const MIB_TCP6TABLE_OWNER_MODULE;
+                let num_entries = unsafe { (*table_ptr).dwNumEntries };
+                let row_ptr = unsafe { &((*table_ptr).table) as *const MIB_TCP6ROW_OWNER_MODULE };
+
+                for i in 0..num_entries {
+                    let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
+                        Ok(handle) => {
+                            let mut path_buffer= [0u16; 260];
+                            let length = unsafe { GetProcessImageFileNameW(handle, &mut path_buffer) };
+                            if length > 0 {
+                                let path = String::from_utf16_lossy(&path_buffer[..length as usize]);
+                                tcp_sockets.push(
+                                    Socket {
+                                        process_name: path.split("\\").last().unwrap_or("unknown").trim().to_string(),
+                                        pid: row.dwOwningPid,
+                                        port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                        protocol: "TCP",
+                                        remote_addr: Some(Ipv6Addr::from(row.ucRemoteAddr).to_string()),
+                                        local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
+                                        remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
+                                        state: map_tcp_state(row.dwState),
+                                        executable_path: to_dos_path(&path)
+                                    }
+                                );
+                            }
+                            unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
+                        }
+                        Err(_) => {}
+                    } 
+                }
+            }
+        } 
+    }
+    tcp_sockets
+}
+
 
 //--------------------------------------------------------------------------------------------------------------------------

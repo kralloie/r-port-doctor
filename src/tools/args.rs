@@ -16,7 +16,10 @@ pub struct Args {
     pub pid: Option<u32>,
 
     #[arg(short = 's', long, help = "Filter by socket state (LISTEN, ESTABLISHED, etc)")]
-    pub state: Option<String>
+    pub state: Option<String>,
+
+    #[arg(short = 'v', long = "ip-version", help = "Filter by IPv4 or IPv6")]
+    pub ip_version: Option<String>
 }
 
 impl Args {
