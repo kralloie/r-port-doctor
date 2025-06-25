@@ -18,7 +18,7 @@ pub struct Args {
     #[arg(short = 's', long, help = "Filter by socket state (LISTEN, ESTABLISHED, etc)")]
     pub state: Option<String>,
 
-    #[arg(short = 'v', long = "ip-version", help = "Filter by IPv4 or IPv6")]
+    #[arg(short = 'v', long = "ip-version", help = "Specify IP version (IPv4/IPv6), defaults to IPv4")]
     pub ip_version: Option<String>
 }
 
