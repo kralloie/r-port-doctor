@@ -55,7 +55,7 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                                         remote_addr: None,
                                         local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
                                         remote_port: None,
-                                        state: "-".to_string(),
+                                        state: " ".to_string(),
                                         executable_path: to_dos_path(&path)
                                     }
                                 );
@@ -122,7 +122,7 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                                         remote_addr: None,
                                         local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
                                         remote_port: None,
-                                        state: "-".to_string(),
+                                        state: " ".to_string(),
                                         executable_path: to_dos_path(&path)
                                     }
                                 );

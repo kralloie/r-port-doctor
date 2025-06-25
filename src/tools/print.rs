@@ -45,13 +45,13 @@ fn map_state_color(state: &String) -> ColoredString{
         "TIME_WAIT" => state.white(),
         "DELETE_TCB" => state.white(),
         "UNKNOWN" => state.purple(),
-        _ => "-".purple()
+        _ => " ".white()
     }
 }
 
 pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
     let port_str = format!("{}:{}", socket.port, socket.remote_port.unwrap_or(0));
-    let remote_addr = socket.remote_addr.as_deref().unwrap_or("-");
+    let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
         "UDP" => {
             "UDP/IP".bold().blue()
