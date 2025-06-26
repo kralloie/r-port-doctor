@@ -40,6 +40,9 @@ pub fn get_tcp_sockets() -> Vec<Socket> {
 
                 for i in 0..num_entries {
                     let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    if row.dwOwningPid == 0 {
+                        continue;
+                    }
                     match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
                         Ok(handle) => {
                             let mut path_buffer= [0u16; 260];
@@ -62,7 +65,21 @@ pub fn get_tcp_sockets() -> Vec<Socket> {
                             }
                             unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
                         }
-                        Err(_) => {}
+                        Err(_) => {
+                            tcp_sockets.push(
+                                Socket {
+                                    process_name: " ".to_string(),
+                                    pid: row.dwOwningPid,
+                                    port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                    protocol: "TCP",
+                                    remote_addr: Some(Ipv4Addr::from(row.dwRemoteAddr.to_be()).to_string()),
+                                    local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
+                                    remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
+                                    state: map_tcp_state(row.dwState),
+                                    executable_path: None
+                                }
+                            );
+                        }
                     } 
                 }
             }
@@ -107,6 +124,9 @@ pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
 
                 for i in 0..num_entries {
                     let row = unsafe { &(*row_ptr.add(i as usize)) };
+                    if row.dwOwningPid == 0 {
+                        continue;
+                    }
                     match unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, row.dwOwningPid) } {
                         Ok(handle) => {
                             let mut path_buffer= [0u16; 260];
@@ -129,7 +149,21 @@ pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
                             }
                             unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
                         }
-                        Err(_) => {}
+                        Err(_) => {
+                            tcp_sockets.push(
+                                Socket {
+                                    process_name: " ".to_string(),
+                                    pid: row.dwOwningPid,
+                                    port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                    protocol: "TCP",
+                                    remote_addr: Some(Ipv6Addr::from(row.ucRemoteAddr).to_string()),
+                                    local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
+                                    remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
+                                    state: map_tcp_state(row.dwState),
+                                    executable_path: None
+                                }
+                            );
+                        }
                     } 
                 }
             }

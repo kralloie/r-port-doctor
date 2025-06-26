@@ -62,7 +62,21 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                             }
                             unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
                         }
-                        Err(_) => {}
+                        Err(_) => {
+                            udp_sockets.push(
+                                Socket {
+                                    process_name: " ".to_string(),
+                                    pid: row.dwOwningPid,
+                                    port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                    protocol: "UDP",
+                                    remote_addr: None,
+                                    local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
+                                    remote_port: None,
+                                    state: " ".to_string(),
+                                    executable_path: None
+                                }
+                            );
+                        }
                     } 
                 }
             } 
@@ -129,7 +143,21 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                             }
                             unsafe { windows::Win32::Foundation::CloseHandle(handle).ok(); }
                         }
-                        Err(_) => {}
+                        Err(_) => {
+                            udp_sockets.push(
+                                Socket {
+                                    process_name: " ".to_string(),
+                                    pid: row.dwOwningPid,
+                                    port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
+                                    protocol: "UDP",
+                                    remote_addr: None,
+                                    local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
+                                    remote_port: None,
+                                    state: " ".to_string(),
+                                    executable_path: None
+                                }
+                            );
+                        }
                     } 
                 }
             } 
