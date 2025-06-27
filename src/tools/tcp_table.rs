@@ -68,7 +68,14 @@ pub fn get_tcp_sockets() -> Vec<Socket> {
                         Err(_) => {
                             tcp_sockets.push(
                                 Socket {
-                                    process_name: " ".to_string(),
+                                    process_name: match row.dwOwningPid {
+                                        4 => {
+                                            "SYSTEM".to_string()
+                                        }
+                                        _ => {
+                                            " ".to_string()
+                                        }
+                                    },
                                     pid: row.dwOwningPid,
                                     port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
                                     protocol: "TCP",
@@ -152,7 +159,14 @@ pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
                         Err(_) => {
                             tcp_sockets.push(
                                 Socket {
-                                    process_name: " ".to_string(),
+                                    process_name: match row.dwOwningPid {
+                                        4 => {
+                                            "SYSTEM".to_string()
+                                        }
+                                        _ => {
+                                            " ".to_string()
+                                        }
+                                    },
                                     pid: row.dwOwningPid,
                                     port: u16::from_be((row.dwLocalPort & 0xFFFF) as u16),
                                     protocol: "TCP",

@@ -63,9 +63,18 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
             "unknown".bold().red()
         }
     };
+    let process_name = match socket.process_name.as_str() {
+        "SYSTEM" => {
+            "SYSTEM".bold().cyan()
+        }
+        _ => {
+            ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold()
+        }
+    };
+
     let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}",
         socket.pid,
-        ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold(), 
+        process_name, 
         port_str, 
         protocol_string,
         socket.local_addr,
