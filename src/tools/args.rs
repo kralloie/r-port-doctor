@@ -19,7 +19,13 @@ pub struct Args {
     pub state: Option<String>,
 
     #[arg(short = 'v', long = "ip-version", help = "IP version (4 for IPv4 & 6 for IPv6), defaults to IPv4")]
-    pub ip_version: Option<u8>
+    pub ip_version: Option<u8>,
+
+    #[arg(short = 'l', long = "local-ip", help = "Filter by local IP address")]
+    pub local_ip: Option<String>,
+
+    #[arg(short = 'r', long = "remote-ip", help = "Filter by remote IP address")]
+    pub remote_ip: Option<String>
 }
 
 impl Args {
@@ -28,6 +34,8 @@ impl Args {
         self.mode.is_some() as usize + 
         self.process_name.is_some() as usize +
         self.pid.is_some() as usize +
-        self.state.is_some() as usize
+        self.state.is_some() as usize +
+        self.local_ip.is_some() as usize +
+        self.remote_ip.is_some() as usize
     }
 }

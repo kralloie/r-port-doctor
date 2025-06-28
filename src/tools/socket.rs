@@ -44,6 +44,16 @@ fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
         filter_count = filter_count + (socket.state.to_string().to_lowercase() == s.to_lowercase()) as usize;
     }
 
+    if let Some(l) = args.local_ip.clone() {
+        filter_count = filter_count + (socket.local_addr.to_string().to_lowercase() == l.to_lowercase()) as usize;
+    }
+
+    if let Some(r) = args.remote_ip.clone() {
+        if let Some(remote_addr) = socket.remote_addr.clone() {
+            filter_count = filter_count + (remote_addr.to_string().to_lowercase() == r.to_lowercase()) as usize;
+        }
+    }
+
     filter_count == argc
 }
 
