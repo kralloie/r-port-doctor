@@ -4,9 +4,10 @@ use windows::Win32::
     ;
 use colored::*;
 use crate::tools::{args::Args, print::*};
+use serde::Serialize;
 
 //--------------------------------------------------------------------------------------------------------------------------
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Socket {
     pub process_name: String,
     pub pid: u32,
@@ -87,15 +88,19 @@ impl Socket {
         let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
         let state_w  = 15;
         let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w];
-        print_socket_table_header(&widths);
         if argc > 0 {
             filtered_table = printable_table.iter().filter(|socket| filter_socket_table(args, argc, socket)).cloned().collect();
             printable_table = &filtered_table;
         }
-        for (i, socket) in printable_table.iter().enumerate() {
-            print_socket_row(socket, &widths, i);
+        if args.json {
+            println!("{}", serde_json::to_string_pretty(&printable_table).unwrap());
+        } else {
+            print_socket_table_header(&widths);
+            for (i, socket) in printable_table.iter().enumerate() {
+                print_socket_row(socket, &widths, i);
+            }
+            print_table_line(&widths);
         }
-        print_table_line(&widths);
     }
 }
 

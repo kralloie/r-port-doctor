@@ -25,7 +25,10 @@ pub struct Args {
     pub local_ip: Option<String>,
 
     #[arg(short = 'r', long = "remote-ip", help = "Filter by remote IP address")]
-    pub remote_ip: Option<String>
+    pub remote_ip: Option<String>,
+
+    #[arg(long = "json", help = "Output socket table in JSON format")]
+    pub json: bool
 }
 
 impl Args {
