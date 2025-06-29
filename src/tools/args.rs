@@ -28,7 +28,10 @@ pub struct Args {
     pub remote_ip: Option<String>,
 
     #[arg(long = "json", help = "Output socket table in JSON format")]
-    pub json: bool
+    pub json: bool,
+
+    #[arg(long = "no-system", help = "Filters out system processes (PID 4)")]
+    pub no_system: bool
 }
 
 impl Args {
@@ -39,6 +42,7 @@ impl Args {
         self.pid.is_some() as usize +
         self.state.is_some() as usize +
         self.local_ip.is_some() as usize +
-        self.remote_ip.is_some() as usize
+        self.remote_ip.is_some() as usize +
+        self.no_system as usize
     }
 }

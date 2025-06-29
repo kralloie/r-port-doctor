@@ -55,6 +55,10 @@ fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
         }
     }
 
+    if args.no_system {
+        filter_count = filter_count + (socket.pid != 4) as usize;
+    }
+
     filter_count == argc
 }
 
