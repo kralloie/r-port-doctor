@@ -3,22 +3,22 @@ use clap::{arg, Parser};
 #[derive(Parser, Debug)]
 #[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool")]
 pub struct Args {
-    #[arg(short = 'p', long, help = "Filter by local port")]
+    #[arg(short = 'p', long, help = "Filter by local port number")]
     pub port: Option<u16>,
 
-    #[arg(short = 'm', long, help = "Filter by protocol (UDP/TCP)")]
+    #[arg(short = 'm', long, help = "Filter by protocol (TCP or UDP)")]
     pub mode: Option<String>,
 
-    #[arg(short = 'n', long = "process-name", help = "Filter by similar process name")]
+    #[arg(short = 'n', long = "process-name", help = "Filter by process name (partial match)")]
     pub process_name: Option<String>,
 
-    #[arg(short = 'i', long, help = "Filter by PID")]
+    #[arg(short = 'i', long, help = "Filter by process ID (PID)")]
     pub pid: Option<u32>,
 
-    #[arg(short = 's', long, help = "Filter by socket state (LISTEN, ESTABLISHED, etc)")]
+    #[arg(short = 's', long, help = "Filter by connection state (e.g., LISTEN, ESTABLISHED)")]
     pub state: Option<String>,
 
-    #[arg(short = 'v', long = "ip-version", help = "IP version (4 for IPv4 & 6 for IPv6), defaults to IPv4")]
+    #[arg(short = 'v', long = "ip-version", help = "Specify IP version (4 for IPv4, 6 for IPv6). Defaults to IPv4.")]
     pub ip_version: Option<u8>,
 
     #[arg(short = 'l', long = "local-ip", help = "Filter by local IP address")]
@@ -27,11 +27,17 @@ pub struct Args {
     #[arg(short = 'r', long = "remote-ip", help = "Filter by remote IP address")]
     pub remote_ip: Option<String>,
 
-    #[arg(long = "json", help = "Output socket table in JSON format")]
+    #[arg(long = "json", help = "Output results in JSON format")]
     pub json: bool,
 
-    #[arg(long = "no-system", help = "Filters out system processes (PID 4)")]
-    pub no_system: bool
+    #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
+    pub no_system: bool,
+
+    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, or port")]
+    pub sort_asc_by: Option<String>,
+
+    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, or port")]
+    pub sort_desc_by: Option<String>
 }
 
 impl Args {

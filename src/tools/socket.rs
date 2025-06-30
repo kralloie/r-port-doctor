@@ -1,8 +1,6 @@
-use std::fmt::{Display, Formatter};
 use windows::Win32::
         Networking::WinSock::{AF_INET, AF_INET6}
     ;
-use colored::*;
 use crate::tools::{args::Args, print::*};
 use serde::Serialize;
 
@@ -63,6 +61,38 @@ fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
 }
 
 impl Socket {
+    pub fn sort_socket_table(socket_table: &mut Vec<Socket>, args: &Args) {
+            if let Some(sort_arg) = args.sort_asc_by.clone() {
+            match sort_arg.to_lowercase().as_str() {
+                "pid" => {
+                    socket_table.sort_by_key(|s| s.pid);
+                },
+                "port" => {
+                    socket_table.sort_by_key(|s| s.port);
+                }
+                "name" => {
+                    socket_table.sort_by_key(|s| s.process_name.clone().to_lowercase());
+                }
+                _ => {}
+            }
+        }
+
+        if let Some(sort_arg) = args.sort_desc_by.clone() {
+            match sort_arg.to_lowercase().as_str() {
+                "pid" => {
+                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.pid));
+                },
+                "port" => {
+                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.port));
+                },
+                "name" => {
+                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.process_name.clone().to_lowercase()));
+                }
+                _ => {}
+            }
+        }
+    }
+
     pub fn print_socket_table(socket_table: &Vec<Socket>, args: &Args, argc: usize) {
         let mut printable_table = socket_table;
         let filtered_table: Vec<Socket>;
@@ -105,25 +135,6 @@ impl Socket {
             }
             print_table_line(&widths);
         }
-    }
-}
-
-impl Display for Socket {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-        let protocol_string = match self.protocol {
-            "TCP" => "TCP".bold().blue(),
-            "UDP" => "UDP".bold().green(),
-            _ => "unknown".bold().red()
-        };
-
-        write!(f, "-------------------\nPID: {}\nProcess Name: {}\nPort: {}:{}\nProtocol: {}\nAddress: {}:{}",
-            self.pid.to_string().bold(),
-            self.process_name.bold().underline(),
-            self.port, self.remote_port.unwrap_or(0),
-            protocol_string,
-            self.local_addr, self.remote_addr.as_deref().unwrap_or("")
-        )?;
-        Ok(())
     }
 }
 

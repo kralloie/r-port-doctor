@@ -28,6 +28,6 @@ fn main() {
             sockets.extend(get_udp_sockets());
         }
     }
-
+    socket::Socket::sort_socket_table(&mut sockets, &args);
     socket::Socket::print_socket_table(&sockets, &args, argc);
 }
