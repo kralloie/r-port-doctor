@@ -21,7 +21,7 @@ pub struct Socket {
 pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
 pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
 
-fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
+pub fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
     let mut filter_count = 0;
 
     if let Some(p) = args.port {
@@ -112,9 +112,7 @@ impl Socket {
         }
     }
 
-    pub fn print_socket_table(socket_table: &Vec<Socket>, args: &Args, argc: usize) {
-        let mut printable_table = socket_table;
-        let filtered_table: Vec<Socket>;
+    pub fn print_socket_table(socket_table: &Vec<Socket>, args: &Args) {
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
@@ -141,15 +139,12 @@ impl Socket {
         let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
         let state_w  = 15;
         let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w];
-        if argc > 0 {
-            filtered_table = printable_table.iter().filter(|socket| filter_socket_table(args, argc, socket)).cloned().collect();
-            printable_table = &filtered_table;
-        }
+
         if args.json {
-            println!("{}", serde_json::to_string_pretty(&printable_table).unwrap());
+            println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
         } else {
             print_socket_table_header(&widths);
-            for (i, socket) in printable_table.iter().enumerate() {
+            for (i, socket) in socket_table.iter().enumerate() {
                 print_socket_row(socket, &widths, i);
             }
             print_table_line(&widths);
