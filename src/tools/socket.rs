@@ -69,7 +69,7 @@ fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
 
 impl Socket {
     pub fn sort_socket_table(socket_table: &mut Vec<Socket>, args: &Args) {
-            if let Some(sort_arg) = args.sort_asc_by.clone() {
+        if let Some(sort_arg) = args.sort_asc_by.clone() {
             match sort_arg.to_lowercase().as_str() {
                 "pid" => {
                     socket_table.sort_by_key(|s| s.pid);
@@ -83,7 +83,10 @@ impl Socket {
                 "name" => {
                     socket_table.sort_by_key(|s| s.process_name.clone().to_lowercase());
                 }
-                _ => {}
+                _ => {
+                    eprintln!("error: Invalid sort argument: '{}'\nAvailable arguments:\n- 'pid'     (Process ID)\n- 'port'    (Local Port)\n- 'rport'   (Remote Port)\n- 'name'    (Process Name)", sort_arg);
+                    std::process::exit(0)
+                }
             }
         }
 
@@ -101,7 +104,10 @@ impl Socket {
                 "name" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.process_name.clone().to_lowercase()));
                 }
-                _ => {}
+                _ => {
+                    eprintln!("error: Invalid sort argument: '{}'\nAvailable arguments:\n- 'pid'     (Process ID)\n- 'port'    (Local Port)\n- 'rport'   (Remote Port)\n- 'name'    (Process Name)", sort_arg);
+                    std::process::exit(0)
+                }
             }
         }
     }
