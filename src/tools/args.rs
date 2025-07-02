@@ -3,10 +3,10 @@ use clap::{arg, Parser};
 #[derive(Parser, Debug)]
 #[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool")]
 pub struct Args {
-    #[arg(short = 'p', long, help = "Filter by local port number")]
+    #[arg(short = 'l', long, help = "Filter by local port number")]
     pub port: Option<u16>,
 
-    #[arg(long = "remote-port", help = "Filter by remote port number")]
+    #[arg(short = 'r', long = "remote-port", help = "Filter by remote port number")]
     pub remote_port: Option<u16>,
 
     #[arg(short = 'm', long, help = "Filter by protocol (TCP or UDP)")]
@@ -24,10 +24,10 @@ pub struct Args {
     #[arg(short = 'v', long = "ip-version", help = "Specify IP version (4 for IPv4, 6 for IPv6). Defaults to IPv4.")]
     pub ip_version: Option<u8>,
 
-    #[arg(short = 'l', long = "local-ip", help = "Filter by local IP address")]
+    #[arg(long = "local-ip", help = "Filter by local IP address")]
     pub local_ip: Option<String>,
 
-    #[arg(short = 'r', long = "remote-ip", help = "Filter by remote IP address")]
+    #[arg(long = "remote-ip", help = "Filter by remote IP address")]
     pub remote_ip: Option<String>,
 
     #[arg(long = "json", help = "Output results in JSON format")]
