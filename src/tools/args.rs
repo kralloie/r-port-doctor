@@ -6,6 +6,9 @@ pub struct Args {
     #[arg(short = 'p', long, help = "Filter by local port number")]
     pub port: Option<u16>,
 
+    #[arg(long = "remote-port", help = "Filter by remote port number")]
+    pub remote_port: Option<u16>,
+
     #[arg(short = 'm', long, help = "Filter by protocol (TCP or UDP)")]
     pub mode: Option<String>,
 
@@ -33,16 +36,17 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, or port")]
+    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port or remote port (rport)")]
     pub sort_asc_by: Option<String>,
 
-    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, or port")]
+    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port or remote port (rport)")]
     pub sort_desc_by: Option<String>
 }
 
 impl Args {
     pub fn get_argc(&self) -> usize {
         self.port.is_some() as usize + 
+        self.remote_port.is_some() as usize +
         self.mode.is_some() as usize + 
         self.process_name.is_some() as usize +
         self.pid.is_some() as usize +

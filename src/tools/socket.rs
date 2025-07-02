@@ -23,8 +23,15 @@ pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
 
 fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
     let mut filter_count = 0;
+
     if let Some(p) = args.port {
         filter_count = filter_count + (socket.port == p) as usize;
+    }
+
+    if let Some(p) = args.remote_port {
+        if let Some(rp) = socket.remote_port {
+            filter_count = filter_count + (rp == p) as usize;
+        }       
     }
 
     if let Some(m) = args.mode.clone() {
@@ -70,6 +77,9 @@ impl Socket {
                 "port" => {
                     socket_table.sort_by_key(|s| s.port);
                 }
+                "rport" => {
+                    socket_table.sort_by_key(|s| s.remote_port);
+                }
                 "name" => {
                     socket_table.sort_by_key(|s| s.process_name.clone().to_lowercase());
                 }
@@ -84,6 +94,9 @@ impl Socket {
                 },
                 "port" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.port));
+                },
+                "rport" => {
+                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.remote_port));
                 },
                 "name" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.process_name.clone().to_lowercase()));
