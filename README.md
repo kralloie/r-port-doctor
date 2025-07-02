@@ -11,13 +11,13 @@ It works like an advanced `netstat` replacement with rich filtering, sorting, an
 ✅ Shows local & remote addresses, ports, connection state, owning PID & process name  
 ✅ Hyperlink on process name to process executable folder  
 ✅ Filter by:
-- Port
+- Local/Remote port
 - Protocol (TCP / UDP)
 - Process name (partial match)
 - PID
 - Connection state (LISTEN, ESTABLISHED, etc)
 - IP version (IPv4/IPv6)
-- Local IP or Remote IP
+- Local/Remote IP address
   
 ✅ Sort ascending or descending by PID, process name, or port  
 ✅ JSON output for easy parsing  
