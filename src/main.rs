@@ -1,6 +1,6 @@
 use clap::Parser;
 use r_port_doctor::tools::args::Args;
-use r_port_doctor::tools::socket::{self, Socket};
+use r_port_doctor::tools::socket::{Socket};
 use r_port_doctor::tools::tcp_table::{get_tcp_sockets, get_tcp_sockets_ipv6};
 use r_port_doctor::tools::udp_table::{get_udp_sockets, get_udp_sockets_ipv6};
 fn main() {     
@@ -17,6 +17,7 @@ fn main() {
         }
     };
     let argc = args.get_argc();
+
     let mut sockets: Vec<Socket>;
     match args.ip_version {
         Some(version) => {
@@ -41,10 +42,7 @@ fn main() {
         }
     }
 
-    if argc > 0 {
-        sockets = sockets.iter().filter(|s| socket::filter_socket_table(&args, argc, s)).cloned().collect()
-    }
-
+    Socket::filter_socket_table(&mut sockets, &args, argc);
     Socket::sort_socket_table(&mut sockets, &args);
     Socket::print_socket_table(&sockets, &args);
 }

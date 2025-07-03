@@ -21,58 +21,64 @@ pub struct Socket {
 pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
 pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
 
-pub fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool {
-    let mut filter_count = 0;
-
-    if let Some(p) = args.port {
-        filter_count = filter_count + (socket.port == p) as usize;
-    }
-
-    if let Some(p) = args.remote_port {
-        if let Some(rp) = socket.remote_port {
-            filter_count = filter_count + (rp == p) as usize;
-        }       
-    }
-
-    if let Some(m) = args.mode.clone() {
-        let protocol = m.to_lowercase();
-        if protocol != "tcp" && protocol != "udp" {
-            eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
-            std::process::exit(0);
-        }
-        filter_count = filter_count + (socket.protocol.to_lowercase() == protocol) as usize;
-    }
-
-    if let Some(n) = args.process_name.clone() {
-        filter_count = filter_count + (socket.process_name.to_lowercase().contains(n.to_lowercase().as_str())) as usize;
-    }
-
-    if let Some(i) = args.pid {
-        filter_count = filter_count + (socket.pid == i) as usize;
-    }
-
-    if let Some(s) = args.state.clone() {
-        filter_count = filter_count + (socket.state.to_string().to_lowercase() == s.to_lowercase()) as usize;
-    }
-
-    if let Some(l) = args.local_ip.clone() {
-        filter_count = filter_count + (socket.local_addr.to_string().to_lowercase() == l.to_lowercase()) as usize;
-    }
-
-    if let Some(r) = args.remote_ip.clone() {
-        if let Some(remote_addr) = socket.remote_addr.clone() {
-            filter_count = filter_count + (remote_addr.to_string().to_lowercase() == r.to_lowercase()) as usize;
-        }
-    }
-
-    if args.no_system {
-        filter_count = filter_count + (socket.pid != 4) as usize;
-    }
-
-    filter_count == argc
-}
-
 impl Socket {
+    pub fn filter_socket_row (args: &Args, argc: usize, socket: &&Socket) -> bool {
+        let mut filter_count = 0;
+
+        if let Some(p) = args.port {
+            filter_count += (socket.port == p) as usize;
+        }
+
+        if let Some(p) = args.remote_port {
+            if let Some(rp) = socket.remote_port {
+                filter_count += (rp == p) as usize;
+            }       
+        }
+
+        if let Some(m) = &args.mode {
+            let protocol = m.to_lowercase();
+            if protocol != "tcp" && protocol != "udp" {
+                eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
+                std::process::exit(0);
+            }
+            filter_count += (socket.protocol.to_lowercase() == protocol) as usize;
+        }
+
+        if let Some(n) = &args.process_name {
+            filter_count += (socket.process_name.to_lowercase().contains(n.to_lowercase().as_str())) as usize;
+        }
+
+        if let Some(i) = args.pid {
+            filter_count += (socket.pid == i) as usize;
+        }
+
+        if let Some(s) = &args.state {
+            filter_count += (socket.state.to_string().to_lowercase() == s.to_lowercase()) as usize;
+        }
+
+        if let Some(l) = &args.local_ip {
+            filter_count += (socket.local_addr.to_string().to_lowercase() == l.to_lowercase()) as usize;
+        }
+
+        if let Some(r) = &args.remote_ip {
+            if let Some(remote_addr) = &socket.remote_addr {
+                filter_count += (remote_addr.to_string().to_lowercase() == r.to_lowercase()) as usize;
+            }
+        }
+
+        if args.no_system {
+            filter_count += (socket.pid != 4) as usize;
+        }
+
+        filter_count == argc
+    }
+
+    pub fn filter_socket_table(socket_table: &mut Vec<Socket>, args: &Args, argc: usize) {
+        if argc > 0 {
+            *socket_table = socket_table.iter().filter(|s| Socket::filter_socket_row(&args, argc, s)).cloned().collect();
+        }
+    }
+
     pub fn sort_socket_table(socket_table: &mut Vec<Socket>, args: &Args) {
         if let Some(sort_arg) = args.sort_asc_by.clone() {
             match sort_arg.to_lowercase().as_str() {
