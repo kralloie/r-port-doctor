@@ -20,12 +20,19 @@ fn main() {
     let mut sockets: Vec<Socket>;
     match args.ip_version {
         Some(version) => {
-            if version == 6 {
-                sockets = get_tcp_sockets_ipv6();
-                sockets.extend(get_udp_sockets_ipv6());
-            } else {
-                sockets = get_tcp_sockets();
-                sockets.extend(get_udp_sockets());
+            match version {
+                6 => {
+                    sockets = get_tcp_sockets_ipv6();
+                    sockets.extend(get_udp_sockets_ipv6());
+                },
+                4 => {
+                    sockets = get_tcp_sockets();
+                    sockets.extend(get_udp_sockets());
+                },
+                _ => { 
+                    eprintln!("error: Invalid IP version\n\nValid versions:\n\n- 4 (IPv4)\n- 6 (IPv6)");
+                    std::process::exit(0);
+                }
             }
         }
         None => {
