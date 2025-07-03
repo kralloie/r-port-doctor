@@ -35,7 +35,12 @@ pub fn filter_socket_table (args: &Args, argc: usize, socket: &&Socket) -> bool 
     }
 
     if let Some(m) = args.mode.clone() {
-        filter_count = filter_count + (socket.protocol.to_lowercase() == m.to_lowercase()) as usize;
+        let protocol = m.to_lowercase();
+        if protocol != "tcp" && protocol != "udp" {
+            eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
+            std::process::exit(0);
+        }
+        filter_count = filter_count + (socket.protocol.to_lowercase() == protocol) as usize;
     }
 
     if let Some(n) = args.process_name.clone() {
