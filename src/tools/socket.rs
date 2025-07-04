@@ -127,21 +127,15 @@ impl Socket {
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
-        for socket in socket_table {
-            if socket.process_name.len() > largest_file_name{
-                largest_file_name = socket.process_name.len();
-            }
 
-            if socket.local_addr.len() > largest_local_addr {
-                largest_local_addr = socket.local_addr.len();
-            }
-
+        socket_table.iter().for_each(|socket| {
+            largest_file_name = largest_file_name.max(socket.process_name.len());
+            largest_local_addr = largest_local_addr.max(socket.local_addr.len());
             if let Some(addr) = &socket.remote_addr {
-                if addr.len() > largest_remote_addr {
-                    largest_remote_addr = addr.len();
-                }
+                largest_remote_addr = largest_remote_addr.max(addr.len());
             }
-        }
+        });
+
         let pid_w = 10;
         let port_w = 14;
         let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
