@@ -2,7 +2,7 @@ use std::{ffi::c_void, net::{Ipv4Addr, Ipv6Addr}, ptr};
 
 use windows::Win32::{Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedUdpTable, MIB_UDP6ROW_OWNER_MODULE, MIB_UDP6TABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, UDP_TABLE_OWNER_MODULE}, System::{ProcessStatus::GetProcessImageFileNameW, Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}}};
 
-use crate::tools::{nt_to_dos::to_dos_path, socket::{Socket, IPV4_ULAF, IPV6_ULAF}};
+use crate::tools::{get_process_name::get_process_name_toolhelp, nt_to_dos::to_dos_path, socket::{Socket, IPV4_ULAF, IPV6_ULAF}};
 
 pub fn get_udp_sockets() -> Vec<Socket> {
     let mut udp_sockets: Vec<Socket> = Vec::new();
@@ -70,7 +70,11 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                                             "SYSTEM".to_string()
                                         }
                                         _ => {
-                                            " ".to_string()
+                                            if let Some(process_name) = get_process_name_toolhelp(row.dwOwningPid) {
+                                                process_name
+                                            } else {
+                                                "unknown".to_string()
+                                            }
                                         }
                                     },
                                     pid: row.dwOwningPid,
@@ -158,7 +162,11 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                                             "SYSTEM".to_string()
                                         }
                                         _ => {
-                                            " ".to_string()
+                                            if let Some(process_name) = get_process_name_toolhelp(row.dwOwningPid) {
+                                                process_name
+                                            } else {
+                                                "unknown".to_string()
+                                            }
                                         }
                                     },
                                     pid: row.dwOwningPid,

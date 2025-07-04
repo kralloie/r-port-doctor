@@ -67,6 +67,9 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         "SYSTEM" => {
             "SYSTEM".bold().cyan()
         }
+        "unknown" => {
+            "unknown".bold().red()
+        }
         _ => {
             ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold()
         }
