@@ -1,6 +1,4 @@
-use windows::Win32::
-        Networking::WinSock::{AF_INET, AF_INET6}
-    ;
+use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
 use crate::tools::{args::Args, print::*};
 use serde::Serialize;
 
@@ -22,16 +20,18 @@ pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
 pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
 
 impl Socket {
-    pub fn filter_socket_row (args: &Args, argc: usize, socket: &&Socket) -> bool {
-        let mut filter_count = 0;
-
+    pub fn filter_socket_row (args: &Args, socket: &&Socket) -> bool {
         if let Some(p) = args.port {
-            filter_count += (socket.port == p) as usize;
+            if socket.port != p {
+                return false
+            }
         }
 
         if let Some(p) = args.remote_port {
             if let Some(rp) = socket.remote_port {
-                filter_count += (rp == p) as usize;
+                if rp != p {
+                    return false
+                }
             }       
         }
 
@@ -41,41 +41,55 @@ impl Socket {
                 eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
                 std::process::exit(0);
             }
-            filter_count += (socket.protocol.to_lowercase() == protocol) as usize;
+            if socket.protocol.to_lowercase() != protocol {
+                return false
+            }
         }
 
         if let Some(n) = &args.process_name {
-            filter_count += (socket.process_name.to_lowercase().contains(n.to_lowercase().as_str())) as usize;
+            if !socket.process_name.to_lowercase().contains(n.to_lowercase().as_str()) {
+                return false
+            }
         }
 
         if let Some(i) = args.pid {
-            filter_count += (socket.pid == i) as usize;
+            if socket.pid != i {
+                return false
+            }
         }
 
         if let Some(s) = &args.state {
-            filter_count += (socket.state.to_string().to_lowercase() == s.to_lowercase()) as usize;
+            if socket.state.to_string().to_lowercase() != s.to_lowercase() {
+                return false
+            }
         }
 
         if let Some(l) = &args.local_ip {
-            filter_count += (socket.local_addr.to_string().to_lowercase() == l.to_lowercase()) as usize;
+            if socket.local_addr.to_string().to_lowercase() != l.to_lowercase() {
+                return false
+            }
         }
 
         if let Some(r) = &args.remote_ip {
             if let Some(remote_addr) = &socket.remote_addr {
-                filter_count += (remote_addr.to_string().to_lowercase() == r.to_lowercase()) as usize;
+                if remote_addr.to_string().to_lowercase() != r.to_lowercase() {
+                    return false
+                }
             }
         }
 
         if args.no_system {
-            filter_count += (socket.pid != 4) as usize;
+            if socket.pid == 4 {
+                return false
+            }
         }
 
-        filter_count == argc
+        true
     }
 
     pub fn filter_socket_table(socket_table: &mut Vec<Socket>, args: &Args, argc: usize) {
         if argc > 0 {
-            *socket_table = socket_table.iter().filter(|s| Socket::filter_socket_row(&args, argc, s)).cloned().collect();
+            *socket_table = socket_table.iter().filter(|s| Socket::filter_socket_row(&args, s)).cloned().collect();
         }
     }
 
@@ -135,14 +149,14 @@ impl Socket {
                 largest_remote_addr = largest_remote_addr.max(addr.len());
             }
         });
-
+        
         let pid_w = 10;
         let port_w = 14;
-        let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
         let proto_w = 10;
+        let state_w  = 15;
+        let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
         let local_addr_w = std::cmp::max(largest_local_addr + 2, 17); // + 2 for some extra padding
         let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
-        let state_w  = 15;
         let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w];
 
         if args.json {

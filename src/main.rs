@@ -19,27 +19,25 @@ fn main() {
     let argc = args.get_argc();
 
     let mut sockets: Vec<Socket>;
-    match args.ip_version {
-        Some(version) => {
-            match version {
-                6 => {
-                    sockets = get_tcp_sockets_ipv6();
-                    sockets.extend(get_udp_sockets_ipv6());
-                },
-                4 => {
-                    sockets = get_tcp_sockets();
-                    sockets.extend(get_udp_sockets());
-                },
-                _ => { 
-                    eprintln!("error: Invalid IP version\n\nValid versions:\n\n- 4 (IPv4)\n- 6 (IPv6)");
-                    std::process::exit(0);
-                }
+
+    if let Some(version) = args.ip_version {
+        match version {
+            6 => {
+                sockets = get_tcp_sockets_ipv6();
+                sockets.extend(get_udp_sockets_ipv6());
+            },
+            4 => {
+                sockets = get_tcp_sockets();
+                sockets.extend(get_udp_sockets());
+            },
+            _ => { 
+                eprintln!("error: Invalid IP version\n\nValid versions:\n\n- 4 (IPv4)\n- 6 (IPv6)");
+                std::process::exit(0);
             }
         }
-        None => {
-            sockets = get_tcp_sockets();
-            sockets.extend(get_udp_sockets());
-        }
+    } else {
+        sockets = get_tcp_sockets();
+        sockets.extend(get_udp_sockets());
     }
 
     Socket::filter_socket_table(&mut sockets, &args, argc);
