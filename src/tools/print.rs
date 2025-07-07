@@ -75,7 +75,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         }
     };
 
-    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}",
+    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}|{:^uptime_w$}",
         socket.pid,
         process_name, 
         port_str, 
@@ -83,13 +83,15 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         socket.local_addr,
         remote_addr,
         map_state_color(&socket.state),
+        format!("{}s", socket.uptime),
         pid_w = widths[0],
         process_name_w = widths[1],
         port_w = widths[2],
         proto_w = widths[3],
         local_addr_w = widths[4],
         remote_addr_w = widths[5],
-        state_w = widths[6]
+        state_w = widths[6],
+        uptime_w = widths[7]
     );
     if index %2==0 {
         println!("|{}|", socket_row_str.on_black());
@@ -101,7 +103,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
 pub fn print_socket_table_header(widths: &[usize]) {
     print_table_line(widths);
     println!(
-        "|{:^pid_w$}|{:^process_name_w$}|{:^port_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|",
+        "|{:^pid_w$}|{:^process_name_w$}|{:^port_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|{:^uptime_w$}|",
         "PID".bold(),
         "Process Name".bold(),
         "Port".bold(),
@@ -109,13 +111,15 @@ pub fn print_socket_table_header(widths: &[usize]) {
         "Local Address".bold(),
         "Remote Address".bold(),
         "State".bold(),
+        "Uptime".bold(),
         pid_w = widths[0],
         process_name_w = widths[1],
         port_w = widths[2],
         proto_w = widths[3],
         local_addr_w = widths[4],
         remote_addr_w = widths[5],
-        state_w = widths[6]
+        state_w = widths[6],
+        uptime_w = widths[7]
     );
     print_table_line(widths);
 }

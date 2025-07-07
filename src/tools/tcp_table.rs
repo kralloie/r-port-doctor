@@ -2,7 +2,7 @@ use std::{ffi::c_void, net::{Ipv4Addr, Ipv6Addr}, ptr};
 
 use windows::Win32::{Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedTcpTable, MIB_TCP6ROW_OWNER_MODULE, MIB_TCP6TABLE_OWNER_MODULE, MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE, TCP_TABLE_OWNER_MODULE_ALL}, System::{ProcessStatus::GetProcessImageFileNameW, Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}}};
 
-use crate::tools::{get_process_name::get_process_name_toolhelp, nt_to_dos::to_dos_path, socket::{map_tcp_state, Socket, IPV4_ULAF, IPV6_ULAF}};
+use crate::tools::{get_uptime::get_socket_uptime, get_process_name::get_process_name_toolhelp, nt_to_dos::to_dos_path, socket::{map_tcp_state, Socket, IPV4_ULAF, IPV6_ULAF}};
 
 pub fn get_tcp_sockets() -> Vec<Socket> {
     let mut tcp_sockets: Vec<Socket> = Vec::new();
@@ -59,7 +59,8 @@ pub fn get_tcp_sockets() -> Vec<Socket> {
                                         local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
                                         remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
                                         state: map_tcp_state(row.dwState),
-                                        executable_path: to_dos_path(&path)
+                                        executable_path: to_dos_path(&path),
+                                        uptime: get_socket_uptime(row.liCreateTimestamp)
                                     }
                                 );
                             }
@@ -87,7 +88,8 @@ pub fn get_tcp_sockets() -> Vec<Socket> {
                                     local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
                                     remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
                                     state: map_tcp_state(row.dwState),
-                                    executable_path: None
+                                    executable_path: None,
+                                    uptime: get_socket_uptime(row.liCreateTimestamp)
                                 }
                             );
                         }
@@ -154,7 +156,8 @@ pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
                                         local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
                                         remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
                                         state: map_tcp_state(row.dwState),
-                                        executable_path: to_dos_path(&path)
+                                        executable_path: to_dos_path(&path),
+                                        uptime: get_socket_uptime(row.liCreateTimestamp)
                                     }
                                 );
                             }
@@ -182,7 +185,8 @@ pub fn get_tcp_sockets_ipv6() -> Vec<Socket> {
                                     local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
                                     remote_port: Some(u16::from_be((row.dwRemotePort & 0xFFFF) as u16)),
                                     state: map_tcp_state(row.dwState),
-                                    executable_path: None
+                                    executable_path: None,
+                                    uptime: get_socket_uptime(row.liCreateTimestamp)
                                 }
                             );
                         }

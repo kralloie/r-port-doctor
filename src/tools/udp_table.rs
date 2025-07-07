@@ -2,7 +2,7 @@ use std::{ffi::c_void, net::{Ipv4Addr, Ipv6Addr}, ptr};
 
 use windows::Win32::{Foundation::NO_ERROR, NetworkManagement::IpHelper::{GetExtendedUdpTable, MIB_UDP6ROW_OWNER_MODULE, MIB_UDP6TABLE_OWNER_MODULE, MIB_UDPROW_OWNER_MODULE, MIB_UDPTABLE_OWNER_MODULE, UDP_TABLE_OWNER_MODULE}, System::{ProcessStatus::GetProcessImageFileNameW, Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}}};
 
-use crate::tools::{get_process_name::get_process_name_toolhelp, nt_to_dos::to_dos_path, socket::{Socket, IPV4_ULAF, IPV6_ULAF}};
+use crate::tools::{get_uptime::get_socket_uptime, get_process_name::get_process_name_toolhelp, nt_to_dos::to_dos_path, socket::{Socket, IPV4_ULAF, IPV6_ULAF}};
 
 pub fn get_udp_sockets() -> Vec<Socket> {
     let mut udp_sockets: Vec<Socket> = Vec::new();
@@ -56,7 +56,8 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                                         local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
                                         remote_port: None,
                                         state: " ".to_string(),
-                                        executable_path: to_dos_path(&path)
+                                        executable_path: to_dos_path(&path),
+                                        uptime: get_socket_uptime(row.liCreateTimestamp)
                                     }
                                 );
                             }
@@ -84,7 +85,8 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                                     local_addr: Ipv4Addr::from(row.dwLocalAddr.to_be()).to_string(),
                                     remote_port: None,
                                     state: " ".to_string(),
-                                    executable_path: None
+                                    executable_path: None,
+                                    uptime: get_socket_uptime(row.liCreateTimestamp)
                                 }
                             );
                         }
@@ -148,7 +150,8 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                                         local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
                                         remote_port: None,
                                         state: " ".to_string(),
-                                        executable_path: to_dos_path(&path)
+                                        executable_path: to_dos_path(&path),
+                                        uptime: get_socket_uptime(row.liCreateTimestamp)
                                     }
                                 );
                             }
@@ -176,7 +179,8 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                                     local_addr: Ipv6Addr::from(row.ucLocalAddr).to_string(),
                                     remote_port: None,
                                     state: " ".to_string(),
-                                    executable_path: None
+                                    executable_path: None,
+                                    uptime: get_socket_uptime(row.liCreateTimestamp)
                                 }
                             );
                         }

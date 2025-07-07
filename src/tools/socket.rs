@@ -13,7 +13,8 @@ pub struct Socket {
     pub remote_addr: Option<String>,
     pub remote_port: Option<u16>,
     pub state: String,
-    pub executable_path: Option<String>
+    pub executable_path: Option<String>,
+    pub uptime: u64
 }
 
 pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
@@ -141,10 +142,12 @@ impl Socket {
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
+        let mut largest_uptime: usize = 0;
 
         socket_table.iter().for_each(|socket| {
             largest_file_name = largest_file_name.max(socket.process_name.len());
             largest_local_addr = largest_local_addr.max(socket.local_addr.len());
+            largest_uptime = largest_uptime.max(socket.uptime.to_string().len());
             if let Some(addr) = &socket.remote_addr {
                 largest_remote_addr = largest_remote_addr.max(addr.len());
             }
@@ -154,10 +157,11 @@ impl Socket {
         let port_w = 14;
         let proto_w = 10;
         let state_w  = 15;
+        let uptime_w = std::cmp::max(largest_uptime + 2, 10);
         let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
         let local_addr_w = std::cmp::max(largest_local_addr + 2, 17); // + 2 for some extra padding
         let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
-        let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w];
+        let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w, uptime_w];
 
         if args.json {
             println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
