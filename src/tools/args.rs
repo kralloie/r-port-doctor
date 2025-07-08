@@ -36,10 +36,10 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port or remote port (rport)")]
+    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port, remote port (rport) or uptime")]
     pub sort_asc_by: Option<String>,
 
-    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port or remote port (rport)")]
+    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port, remote port (rport) or uptime")]
     pub sort_desc_by: Option<String>
 }
 
