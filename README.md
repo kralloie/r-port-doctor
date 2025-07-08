@@ -20,7 +20,7 @@ It works like an advanced `netstat` replacement with rich filtering, sorting, an
 - IP version (IPv4/IPv6)
 - Local/Remote IP address
   
-✅ Sort ascending or descending by PID, process name, port (remote/local) or uptime 
+✅ Sort ascending or descending by PID, process name, port (remote/local) or uptime  
 ✅ JSON output for easy parsing  
 ✅ Optionally exclude system processes (PID 4)
 
