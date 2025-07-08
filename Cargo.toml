@@ -23,3 +23,4 @@ windows = { version = "0.52.0", features = [
     "Win32_System_Time"
 ]}
 colored = "2.1.0"
+dns-lookup = "2"

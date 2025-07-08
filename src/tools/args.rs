@@ -40,7 +40,10 @@ pub struct Args {
     pub sort_asc_by: Option<String>,
 
     #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port, remote port (rport) or uptime")]
-    pub sort_desc_by: Option<String>
+    pub sort_desc_by: Option<String>,
+
+    #[arg(long = "resolve-hostname", help = "Tries to replace remote IP address with resolved hostname through DNS lookup if possible (can take few seconds)")]
+    pub resolve_hostname: bool
 }
 
 impl Args {

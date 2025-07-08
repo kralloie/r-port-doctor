@@ -33,6 +33,8 @@ impl Socket {
                 if rp != p {
                     return false
                 }
+            } else {
+                return false
             }       
         }
 
@@ -76,6 +78,8 @@ impl Socket {
                 if remote_addr.to_string().to_lowercase() != r.to_lowercase() {
                     return false
                 }
+            } else {
+                return false
             }
         }
 

@@ -1,5 +1,6 @@
 use clap::Parser;
 use r_port_doctor::tools::args::Args;
+use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::socket::{Socket};
 use r_port_doctor::tools::tcp_table::{get_tcp_sockets, get_tcp_sockets_ipv6};
 use r_port_doctor::tools::udp_table::{get_udp_sockets, get_udp_sockets_ipv6};
@@ -40,6 +41,10 @@ fn main() {
         sockets.extend(get_udp_sockets());
     }
 
+    if args.resolve_hostname {
+        resolve_socket_table_addresses(&mut sockets);
+    }
+    
     Socket::filter_socket_table(&mut sockets, &args, argc);
     Socket::sort_socket_table(&mut sockets, &args);
     Socket::print_socket_table(&sockets, &args);
