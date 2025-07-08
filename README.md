@@ -8,7 +8,7 @@ It works like an advanced `netstat` replacement with rich filtering, sorting, an
 ## Features
 
 ✅ List all TCP & UDP sockets on IPv4 and IPv6  
-✅ Shows local & remote addresses, ports, connection state, owning PID & process name  
+✅ Shows local & remote addresses, ports, connection state, owning PID, process name & seconds since the connection started  
 ✅ Hyperlink on process name to process executable folder (if available)
 
 🔍 Filter by:
