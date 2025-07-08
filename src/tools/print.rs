@@ -75,7 +75,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         }
     };
 
-    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}|{:^uptime_w$}",
+    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}|{:>uptime_w$}",
         socket.pid,
         process_name, 
         port_str, 

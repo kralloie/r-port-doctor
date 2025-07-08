@@ -109,8 +109,11 @@ impl Socket {
                 "name" => {
                     socket_table.sort_by_key(|s| s.process_name.clone().to_lowercase());
                 }
+                "uptime" => {
+                    socket_table.sort_by_key(|s| s.uptime);
+                }
                 _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid'     (Process ID)\n- 'port'    (Local Port)\n- 'rport'   (Remote Port)\n- 'name'    (Process Name)", sort_arg);
+                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'rport' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
                     std::process::exit(0)
                 }
             }
@@ -120,18 +123,21 @@ impl Socket {
             match sort_arg.to_lowercase().as_str() {
                 "pid" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.pid));
-                },
+                }
                 "port" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.port));
-                },
+                }
                 "rport" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.remote_port));
-                },
+                }
                 "name" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.process_name.clone().to_lowercase()));
                 }
+                "uptime" => {
+                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.uptime));
+                }
                 _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid'     (Process ID)\n- 'port'    (Local Port)\n- 'rport'   (Remote Port)\n- 'name'    (Process Name)", sort_arg);
+                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'rport' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
                     std::process::exit(0)
                 }
             }
