@@ -38,17 +38,6 @@ impl Socket {
             }       
         }
 
-        if let Some(m) = &args.mode {
-            let protocol = m.to_lowercase();
-            if protocol != "tcp" && protocol != "udp" {
-                eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
-                std::process::exit(0);
-            }
-            if socket.protocol.to_lowercase() != protocol {
-                return false
-            }
-        }
-
         if let Some(n) = &args.process_name {
             if !socket.process_name.to_lowercase().contains(n.to_lowercase().as_str()) {
                 return false

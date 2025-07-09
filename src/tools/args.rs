@@ -50,7 +50,6 @@ impl Args {
     pub fn get_argc(&self) -> usize {
         self.port.is_some() as usize + 
         self.remote_port.is_some() as usize +
-        self.mode.is_some() as usize + 
         self.process_name.is_some() as usize +
         self.pid.is_some() as usize +
         self.state.is_some() as usize +
