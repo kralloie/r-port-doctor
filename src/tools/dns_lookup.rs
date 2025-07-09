@@ -1,8 +1,19 @@
+use std::{collections::HashMap, sync::{LazyLock, Mutex}};
+
 use dns_lookup::lookup_addr;
 
 use crate::tools::socket::Socket;
+
+static DNS_CACHE: LazyLock<Mutex<HashMap<String, String>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
 pub fn lookup_address(ip: &str) -> String {
-    match ip.trim().parse() {
+    let mut cache = DNS_CACHE.lock().unwrap();
+
+    if let Some(cached) = cache.get(ip) {
+        return cached.clone()
+    }
+
+    let hostname = match ip.trim().parse() {
         Ok(parsed_ip) => {
             match lookup_addr(&parsed_ip) {
                 Ok(name) => {
@@ -16,7 +27,10 @@ pub fn lookup_address(ip: &str) -> String {
         _ => {
             ip.to_string()
         }
-    }
+    };
+
+    cache.insert(ip.to_string(), hostname.clone());
+    hostname
 }
 
 pub fn resolve_socket_table_addresses(sockets: &mut Vec<Socket>) {
