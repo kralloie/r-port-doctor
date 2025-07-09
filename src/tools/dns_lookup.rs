@@ -13,21 +13,11 @@ pub fn lookup_address(ip: &str) -> String {
         return cached.clone()
     }
 
-    let hostname = match ip.trim().parse() {
-        Ok(parsed_ip) => {
-            match lookup_addr(&parsed_ip) {
-                Ok(name) => {
-                    name
-                }
-                _ => {
-                    ip.to_string()
-                }
-            }
-        }
-        _ => {
-            ip.to_string()
-        }
-    };
+    let hostname = ip.trim()
+        .parse()
+        .ok()
+        .and_then(|parsed_ip| lookup_addr(&parsed_ip).ok())
+        .unwrap_or_else(|| ip.to_string());
 
     cache.insert(ip.to_string(), hostname.clone());
     hostname
