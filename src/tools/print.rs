@@ -50,7 +50,7 @@ fn map_state_color(state: &String) -> ColoredString{
 }
 
 pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
-    let port_str = format!("{}:{}", socket.port, socket.remote_port.unwrap_or(0));
+    let port_str = format!("{}:{}", socket.port, socket.remote_port.map_or('-'.to_string(), |p| p.to_string()));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
         "UDP" => {
