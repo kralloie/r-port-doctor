@@ -24,3 +24,4 @@ windows = { version = "0.52.0", features = [
 ]}
 colored = "2.1.0"
 dns-lookup = "2"
+dashmap = "5"
