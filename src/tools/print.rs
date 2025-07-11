@@ -63,6 +63,9 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
             "unknown".bold().red()
         }
     };
+
+    let uptime_str = format!("{:02}:{:02}:{:02}", socket.uptime / 3600, socket.uptime % 3600 / 60, socket.uptime % 60);
+
     let process_name = match socket.process_name.as_str() {
         "SYSTEM" => {
             "SYSTEM".bold().cyan()
@@ -75,7 +78,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         }
     };
 
-    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}|{:>uptime_w$}",
+    let socket_row_str = format!("{:^pid_w$}|{:>process_name_w$}|{:^port_w$}|{:^proto_w$}|{:>local_addr_w$}|{:>remote_addr_w$}|{:^state_w$}|{:^uptime_w$}",
         socket.pid,
         process_name, 
         port_str, 
@@ -83,7 +86,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         socket.local_addr,
         remote_addr,
         map_state_color(&socket.state),
-        format!("{}s", socket.uptime),
+        uptime_str,
         pid_w = widths[0],
         process_name_w = widths[1],
         port_w = widths[2],
