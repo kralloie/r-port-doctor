@@ -1,5 +1,6 @@
 use std::{sync::LazyLock, thread};
 use dns_lookup::lookup_addr;
+use std::collections::HashSet;
 use crate::tools::socket::Socket;
 use dashmap::DashMap;
 
@@ -22,36 +23,51 @@ pub fn lookup_address(ip: &str) -> String {
 
 pub fn resolve_socket_table_addresses(sockets: &mut Vec<Socket>) {
     let threads = 4;
-    let len = sockets.len();
+
+    let mut addresses_hash_set: HashSet<String> = HashSet::new();
+
+    sockets.iter().for_each(|s| {
+        if s.protocol != "UDP" {
+            if let Some(addr) = &s.remote_addr {
+                addresses_hash_set.insert(addr.clone());
+            }   
+        }
+    });
+
+    if addresses_hash_set.len() == 0 {
+        return
+    }
+
+    let addresses: Vec<String> = addresses_hash_set.into_iter().collect();
+    let len = addresses.len();
     let chunk_size = (len + threads - 1) / threads;
 
     let mut handles = Vec::new();
 
-    let chunks: Vec<Vec<Socket>> = sockets
-        .drain(..)
-        .collect::<Vec<_>>()
+    let chunks: Vec<Vec<String>> = addresses
         .chunks(chunk_size)
         .map(|chunk| chunk.to_vec())
         .collect();
 
-    for mut chunk in chunks {
-        let handle = thread::spawn(move || {
-            for s in &mut chunk {
-                if s.protocol == "UDP" {
-                    continue;
-                }
-                if let Some(addr) = &s.remote_addr {
-                    s.remote_addr = Some(lookup_address(addr));
-                }
+    for chunk in chunks {
+        let handle = thread::spawn(|| {
+            for s in chunk {
+                lookup_address(s.as_str());
             }
-            chunk
         });
 
         handles.push(handle);
     }
 
-    for handle in handles {
-        let chunk = handle.join().unwrap();
-        sockets.extend(chunk);
-    }
+    handles.into_iter().for_each(|h| h.join().unwrap());
+
+    sockets.iter_mut().for_each(|s| {
+        if s.protocol != "UDP" {
+            if let Some(addr) = &s.remote_addr {
+                if let Some(resolved_addr) = DNS_CACHE.get(addr) {
+                    s.remote_addr = Some(resolved_addr.clone());
+                }
+            }
+        }
+    });
 }
