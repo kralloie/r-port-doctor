@@ -65,7 +65,9 @@ fn main() {
     }
 
     if args.resolve_hostname {
-        resolve_socket_table_addresses(&mut sockets);
+        if !matches!(&args.mode, Some(m) if m.to_lowercase() == "udp") {
+            resolve_socket_table_addresses(&mut sockets);
+        }
     }
     
     Socket::filter_socket_table(&mut sockets, &args, argc);
