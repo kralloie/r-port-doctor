@@ -165,11 +165,11 @@ impl Socket {
         if args.json {
             println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
         } else {
-            print_socket_table_header(&widths);
+            print_socket_table_header(&widths, args.compact);
             for (i, socket) in socket_table.iter().enumerate() {
-                print_socket_row(socket, &widths, i);
+                print_socket_row(socket, &widths, i, args.compact);
             }
-            print_table_line(&widths);
+            if !args.compact { print_table_line(&widths); }
         }
     }
 }

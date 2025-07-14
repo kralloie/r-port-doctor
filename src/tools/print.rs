@@ -49,7 +49,7 @@ fn map_state_color(state: &String) -> ColoredString{
     }
 }
 
-pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
+pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize, compact: bool) {
     let port_str = format!("{}:{}", socket.port, socket.remote_port.map_or('-'.to_string(), |p| p.to_string()));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
@@ -96,16 +96,22 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize) {
         state_w = widths[6],
         uptime_w = widths[7]
     );
-    if index %2==0 {
-        println!("|{}|", socket_row_str.on_black());
+
+    let row_str = if compact {
+        socket_row_str.replace("|", "")
     } else {
-        println!("|{}|", socket_row_str);
+        format!("|{}|", socket_row_str)
+    };
+
+    if index %2==0 {
+        println!("{}", row_str.on_black());
+    } else {
+        println!("{}", row_str);
     }
 }
 
-pub fn print_socket_table_header(widths: &[usize]) {
-    print_table_line(widths);
-    println!(
+pub fn print_socket_table_header(widths: &[usize], compact: bool) {
+    let header = format!(
         "|{:^pid_w$}|{:^process_name_w$}|{:^port_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|{:^uptime_w$}|",
         "PID".bold(),
         "Process Name".bold(),
@@ -124,5 +130,12 @@ pub fn print_socket_table_header(widths: &[usize]) {
         state_w = widths[6],
         uptime_w = widths[7]
     );
-    print_table_line(widths);
+
+    if compact {
+        println!("{}", header.replace("|", ""))
+    } else {
+        print_table_line(widths);
+        println!("{}", header);
+        print_table_line(widths);
+    }
 }

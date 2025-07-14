@@ -43,7 +43,10 @@ pub struct Args {
     pub sort_desc_by: Option<String>,
 
     #[arg(long = "resolve-hostname", help = "Tries to replace remote IP address with resolved hostname through DNS lookup if possible (can take few seconds)")]
-    pub resolve_hostname: bool
+    pub resolve_hostname: bool,
+
+    #[arg (long = "compact", help = "Removes table borders from output")]
+    pub compact: bool
 }
 
 impl Args {
