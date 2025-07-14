@@ -1,7 +1,16 @@
-use std::path::Path;
+use std::{path::Path};
 
 use colored::{ColoredString, Colorize};
 use crate::tools::socket::Socket;
+
+pub const PID_IDX: usize = 0;
+pub const PROCESS_IDX: usize = 1;
+pub const PORT_IDX: usize = 2;
+pub const PROTOCOL_IDX: usize = 3;
+pub const LOCAL_ADDR_IDX: usize = 4;
+pub const REMOTE_ADDR_IDX: usize = 5;
+pub const STATE_IDX: usize = 6;
+pub const UPTIME_IDX: usize = 7;
 
 pub fn print_table_line(widths: &[usize]) {
     let line_string: String = widths
@@ -87,14 +96,14 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize, compact
         remote_addr,
         map_state_color(&socket.state),
         uptime_str,
-        pid_w = widths[0],
-        process_name_w = widths[1],
-        port_w = widths[2],
-        proto_w = widths[3],
-        local_addr_w = widths[4],
-        remote_addr_w = widths[5],
-        state_w = widths[6],
-        uptime_w = widths[7]
+        pid_w = widths[PID_IDX],
+        process_name_w = widths[PROCESS_IDX],
+        port_w = widths[PORT_IDX],
+        proto_w = widths[PROTOCOL_IDX],
+        local_addr_w = widths[LOCAL_ADDR_IDX],
+        remote_addr_w = widths[REMOTE_ADDR_IDX],
+        state_w = widths[STATE_IDX],
+        uptime_w = widths[UPTIME_IDX]
     );
 
     let row_str = if compact {
@@ -121,14 +130,14 @@ pub fn print_socket_table_header(widths: &[usize], compact: bool) {
         "Remote Address".bold(),
         "State".bold(),
         "Uptime".bold(),
-        pid_w = widths[0],
-        process_name_w = widths[1],
-        port_w = widths[2],
-        proto_w = widths[3],
-        local_addr_w = widths[4],
-        remote_addr_w = widths[5],
-        state_w = widths[6],
-        uptime_w = widths[7]
+        pid_w = widths[PID_IDX],
+        process_name_w = widths[PROCESS_IDX],
+        port_w = widths[PORT_IDX],
+        proto_w = widths[PROTOCOL_IDX],
+        local_addr_w = widths[LOCAL_ADDR_IDX],
+        remote_addr_w = widths[REMOTE_ADDR_IDX],
+        state_w = widths[STATE_IDX],
+        uptime_w = widths[UPTIME_IDX]
     );
 
     if compact {
