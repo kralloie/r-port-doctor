@@ -20,6 +20,16 @@ pub struct Socket {
 pub const IPV4_ULAF: u32 = AF_INET.0 as u32;
 pub const IPV6_ULAF: u32 = AF_INET6.0 as u32;
 
+const TABLE_COLUMNS: usize = 8;
+const PID_W: usize = 10;
+const PORT_W: usize = 14;
+const PROTOCOL_W: usize = 10;
+const STATE_W: usize = 15;
+const UPTIME_W: usize = 12;
+const PROCESS_W: usize = 12;
+const LOCAL_ADDR_W: usize = 17;
+const REMOTE_ADDR_W: usize = 17;
+
 impl Socket {
     pub fn filter_socket_row (args: &Args, socket: &&Socket) -> bool {
         if let Some(p) = args.port {
@@ -141,26 +151,25 @@ impl Socket {
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
-        let mut largest_uptime: usize = 0;
 
         socket_table.iter().for_each(|socket| {
             largest_file_name = largest_file_name.max(socket.process_name.len());
             largest_local_addr = largest_local_addr.max(socket.local_addr.len());
-            largest_uptime = largest_uptime.max(socket.uptime.to_string().len());
             if let Some(addr) = &socket.remote_addr {
                 largest_remote_addr = largest_remote_addr.max(addr.len());
             }
         });
-        
-        let pid_w = 10;
-        let port_w = 14;
-        let proto_w = 10;
-        let state_w  = 15;
-        let uptime_w = std::cmp::max(largest_uptime + 2, 10);
-        let process_name_w = std::cmp::max(largest_file_name + 4, 12); // + 4 for some extra padding
-        let local_addr_w = std::cmp::max(largest_local_addr + 2, 17); // + 2 for some extra padding
-        let remote_addr_w = std::cmp::max(largest_remote_addr + 2, 17);
-        let widths = [pid_w, process_name_w, port_w, proto_w, local_addr_w, remote_addr_w, state_w, uptime_w];
+    
+        let mut widths: [usize; TABLE_COLUMNS] = [0; TABLE_COLUMNS];
+        widths[PID_IDX] = PID_W;
+        widths[PORT_IDX] = PORT_W;
+        widths[STATE_IDX] = STATE_W;
+        widths[UPTIME_IDX] = UPTIME_W;
+        widths[PROTOCOL_IDX] = PROTOCOL_W;
+        // + 2: Extra padding
+        widths[PROCESS_IDX] = std::cmp::max(largest_file_name + 2, PROCESS_W); 
+        widths[LOCAL_ADDR_IDX] = std::cmp::max(largest_local_addr + 2, LOCAL_ADDR_W);
+        widths[REMOTE_ADDR_IDX] = std::cmp::max(largest_remote_addr + 2, REMOTE_ADDR_W);
 
         if args.json {
             println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
