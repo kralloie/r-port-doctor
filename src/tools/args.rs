@@ -36,22 +36,22 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port, remote port (rport) or uptime")]
+    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port, remote port (rport) or uptime", value_name = "FIELD")]
     pub sort_asc_by: Option<String>,
 
-    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port, remote port (rport) or uptime")]
+    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port, remote port (rport) or uptime", value_name = "FIELD")]
     pub sort_desc_by: Option<String>,
 
     #[arg(long = "resolve-hostname", help = "Tries to replace remote IP address with resolved hostname through DNS lookup if possible (can take few seconds)")]
     pub resolve_hostname: bool,
 
-    #[arg (long = "compact", help = "Removes table borders from output")]
+    #[arg(long = "compact", help = "Removes table borders from output")]
     pub compact: bool,
 
-    #[arg (long = "older-than", help = "Filter connections by uptime being older than provided seconds")]
+    #[arg(long = "older-than", help = "Filter connections by uptime being older than provided seconds", value_name = "SECONDS")]
     pub older_than: Option<u32>,
 
-    #[arg (long = "younger-than", help = "Filter connections by uptime being younger than provided seconds")]
+    #[arg(long = "younger-than", help = "Filter connections by uptime being younger than provided seconds", value_name = "SECONDS")]
     pub younger_than: Option<u32>
 }
 
