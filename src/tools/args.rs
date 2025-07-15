@@ -52,7 +52,10 @@ pub struct Args {
     pub older_than: Option<u32>,
 
     #[arg(long = "younger-than", help = "Filter connections by uptime being younger than provided seconds", value_name = "SECONDS")]
-    pub younger_than: Option<u32>
+    pub younger_than: Option<u32>,
+
+    #[arg(long = "fields", help = "Specify which fields should be present on the table output (all fields present by default)", value_name = "FIELD", num_args = 1..=8)]
+    pub fields: Option<Vec<String>>
 }
 
 impl Args {
