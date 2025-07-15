@@ -46,7 +46,13 @@ pub struct Args {
     pub resolve_hostname: bool,
 
     #[arg (long = "compact", help = "Removes table borders from output")]
-    pub compact: bool
+    pub compact: bool,
+
+    #[arg (long = "older-than", help = "Filter connections by uptime being older than provided seconds")]
+    pub older_than: Option<u32>,
+
+    #[arg (long = "younger-than", help = "Filter connections by uptime being younger than provided seconds")]
+    pub younger_than: Option<u32>
 }
 
 impl Args {
@@ -58,6 +64,8 @@ impl Args {
         self.state.is_some() as usize +
         self.local_ip.is_some() as usize +
         self.remote_ip.is_some() as usize +
-        self.no_system as usize
+        self.no_system as usize +
+        self.older_than.is_some() as usize +
+        self.younger_than.is_some() as usize
     }
 }

@@ -82,6 +82,18 @@ impl Socket {
             }
         }
 
+        if let Some(s) = args.older_than {
+            if socket.uptime < s as u64 {
+                return false
+            }
+        }
+
+        if let Some(s) = args.younger_than {
+            if socket.uptime > s as u64 {
+                return false
+            }
+        }
+
         if args.no_system {
             if socket.pid == 4 {
                 return false
