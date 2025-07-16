@@ -82,7 +82,7 @@ fn map_state_color(state: &String) -> ColoredString{
     }
 }
 
-pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize, compact: bool, fields: &Option<Vec<String>>) {
+pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields: &Option<Vec<String>>) {
     let port_str = format!("{}:{}", socket.port, socket.remote_port.map_or('-'.to_string(), |p| p.to_string()));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
@@ -117,35 +117,27 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize, compact
         .for_each(|field| {
             match field.to_lowercase().as_str() {
                 "pid" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:^pid_w$}|", socket.pid, pid_w = widths[PID_IDX]).as_str());
                 }
                 "process_name" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:>process_name_w$}|", process_name, process_name_w = widths[PROCESS_IDX]).as_str());
                 }
                 "port" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:^port_w$}|", port_str, port_w = widths[PORT_IDX]).as_str());
                 }
                 "protocol" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:^proto_w$}|", protocol_string, proto_w = widths[PROTOCOL_IDX]).as_str());
                 }
                 "local_address" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:>local_addr_w$}|", socket.local_addr, local_addr_w = widths[LOCAL_ADDR_IDX]).as_str());
                 }
                 "remote_address" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:>remote_addr_w$}|", remote_addr, remote_addr_w = widths[REMOTE_ADDR_IDX]).as_str());
                 }
                 "state" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:^state_w$}|", map_state_color(&socket.state), state_w = widths[STATE_IDX]).as_str());
                 }
                 "uptime" => {
-                    if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|') ;}
                     socket_row_str.push_str(format!("{:^uptime_w$}|", uptime_str, uptime_w = widths[UPTIME_IDX]).as_str());
                 }
                 _ => {}
@@ -175,58 +167,49 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], index: usize, compact
     let row_str = if compact {
         socket_row_str.replace("|", "")
     } else {
-        socket_row_str
+        if socket_row_str.chars().last() != Some('|') { socket_row_str.push('|'); }
+        format!("|{}", socket_row_str)
     };
 
-    if index %2==0 {
-        println!("{}", row_str.on_black());
-    } else {
-        println!("{}", row_str);
-    }
+    println!("{}", row_str);
+    
 }
 
 pub fn print_socket_table_header(widths: &[usize], compact: bool, fields: &Option<Vec<String>>) {
     let mut header = String::new();
 
     if let Some(fields) = fields {
-        fields.iter()
-        .for_each(|field| {
-            match field.to_lowercase().as_str() {
+        for field in fields {
+            if header.chars().last() != Some('|') { header.push('|') ;}
+            let column_header = match field.to_lowercase().as_str() {
                 "pid" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^pid_w$}|", "PID", pid_w = widths[PID_IDX]).as_str());
+                    format!("{:^pid_w$}|", "PID".bold(), pid_w = widths[PID_IDX])
                 }
                 "process_name" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^process_name_w$}|", "Process Name", process_name_w = widths[PROCESS_IDX]).as_str());
+                    format!("{:^process_name_w$}|", "Process Name".bold(), process_name_w = widths[PROCESS_IDX])
                 }
                 "port" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^port_w$}|", "Port", port_w = widths[PORT_IDX]).as_str());
+                    format!("{:^port_w$}|", "Port".bold(), port_w = widths[PORT_IDX])
                 }
                 "protocol" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^proto_w$}|", "Protocol", proto_w = widths[PROTOCOL_IDX]).as_str());
+                    format!("{:^proto_w$}|", "Protocol".bold(), proto_w = widths[PROTOCOL_IDX])
                 }
                 "local_address" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^local_addr_w$}|", "Local Address", local_addr_w = widths[LOCAL_ADDR_IDX]).as_str());
+                    format!("{:^local_addr_w$}|", "Local Address".bold(), local_addr_w = widths[LOCAL_ADDR_IDX])
                 }
                 "remote_address" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^remote_addr_w$}|", "Remote Address", remote_addr_w = widths[REMOTE_ADDR_IDX]).as_str());
+                    format!("{:^remote_addr_w$}|", "Remote Address".bold(), remote_addr_w = widths[REMOTE_ADDR_IDX])
                 }
                 "state" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^state_w$}|", "State", state_w = widths[STATE_IDX]).as_str());
+                    format!("{:^state_w$}|", "State".bold(), state_w = widths[STATE_IDX])
                 }
                 "uptime" => {
-                    if header.chars().last() != Some('|') { header.push('|') ;}
-                    header.push_str(format!("{:^uptime_w$}|", "Uptime", uptime_w = widths[UPTIME_IDX]).as_str());
+                    format!("{:^uptime_w$}|", "Uptime".bold(), uptime_w = widths[UPTIME_IDX])
                 }
-                _ => {}
-            }
-        });
+                _ => continue,
+            };
+            header.push_str(&column_header);
+        };
     } else {
         header = format!("|{:^pid_w$}|{:^process_name_w$}|{:^port_w$}|{:^proto_w$}|{:^local_addr_w$}|{:^remote_addr_w$}|{:^state_w$}|{:^uptime_w$}|",
             "PID".bold(),

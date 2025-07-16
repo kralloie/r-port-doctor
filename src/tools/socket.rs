@@ -187,8 +187,8 @@ impl Socket {
             println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
         } else {
             print_socket_table_header(&widths, args.compact, &args.fields);
-            for (i, socket) in socket_table.iter().enumerate() {
-                print_socket_row(socket, &widths, i, args.compact, &args.fields);
+            for socket in socket_table{
+                print_socket_row(socket, &widths,args.compact, &args.fields);
             }
             if !args.compact { print_table_line(&widths, &args.fields); }
         }
