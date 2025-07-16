@@ -26,24 +26,6 @@ pub static FIELD_WIDTH_MAP: LazyLock<HashMap<&str, usize>> = LazyLock::new(|| {
     map
 });
 
-pub fn print_table_line(widths: &[usize], fields: &Option<Vec<String>>) {
-    let mut line_string = String::new();
-    if let Some(fields) = fields {
-        fields.iter().for_each(|field| {
-            if let Some(idx) = FIELD_WIDTH_MAP.get(field.as_str()) {
-                if line_string.chars().last() != Some('+') { line_string.push('+'); }
-                line_string.push_str(format!("{}+", "-".repeat(widths[*idx])).as_str());
-            }
-        });
-    } else {
-        line_string = widths
-        .iter()
-        .map(|w| format!("+{}", "-".repeat(*w)))
-        .collect::<String>() + "+";
-    }
-    println!("{}", line_string);
-}
-
 fn ansi_hyperlink(text: &str, url: Option<&str>, width: usize) -> String {
     match url {
         Some(u) => {
@@ -80,6 +62,24 @@ fn map_state_color(state: &String) -> ColoredString{
         "UNKNOWN" => state.purple(),
         _ => " ".white()
     }
+}
+
+pub fn print_table_line(widths: &[usize], fields: &Option<Vec<String>>) {
+    let mut line_string = String::new();
+    if let Some(fields) = fields {
+        fields.iter().for_each(|field| {
+            if let Some(idx) = FIELD_WIDTH_MAP.get(field.as_str()) {
+                if line_string.chars().last() != Some('+') { line_string.push('+'); }
+                line_string.push_str(format!("{}+", "-".repeat(widths[*idx])).as_str());
+            }
+        });
+    } else {
+        line_string = widths
+        .iter()
+        .map(|w| format!("+{}", "-".repeat(*w)))
+        .collect::<String>() + "+";
+    }
+    println!("{}", line_string);
 }
 
 pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields: &Option<Vec<String>>) {
@@ -177,7 +177,6 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
 
 pub fn print_socket_table_header(widths: &[usize], compact: bool, fields: &Option<Vec<String>>) {
     let mut header = String::new();
-
     if let Some(fields) = fields {
         for field in fields {
             if header.chars().last() != Some('|') { header.push('|') ;}
