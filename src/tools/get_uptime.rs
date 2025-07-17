@@ -7,5 +7,5 @@ static CURRENT_FILETIME: LazyLock<u64> = LazyLock::new(|| {
 });
 
 pub fn get_socket_uptime(socket_timestamp: i64) -> u64 {
-    (*CURRENT_FILETIME - socket_timestamp as u64) / 10_000_000 // Nano-seconds to seconds
+    ((*CURRENT_FILETIME as i64 - socket_timestamp) / 10_000_000) as u64 // Nano-seconds to seconds
 }
