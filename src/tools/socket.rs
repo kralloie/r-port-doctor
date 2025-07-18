@@ -163,10 +163,12 @@ impl Socket {
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
+        let mut largest_uptime: usize = 0;
 
         socket_table.iter().for_each(|socket| {
             largest_file_name = largest_file_name.max(socket.process_name.len());
             largest_local_addr = largest_local_addr.max(socket.local_addr.len());
+            largest_uptime = largest_uptime.max(get_formatted_uptime(&args.uptime_format, socket.uptime).len());
             if let Some(addr) = &socket.remote_addr {
                 largest_remote_addr = largest_remote_addr.max(addr.len());
             }
@@ -176,9 +178,9 @@ impl Socket {
         widths[PID_IDX] = PID_W;
         widths[PORT_IDX] = PORT_W;
         widths[STATE_IDX] = STATE_W;
-        widths[UPTIME_IDX] = UPTIME_W;
         widths[PROTOCOL_IDX] = PROTOCOL_W;
         // + 2: Extra padding
+        widths[UPTIME_IDX] = std::cmp::max(largest_uptime + 2, UPTIME_W);
         widths[PROCESS_IDX] = std::cmp::max(largest_file_name + 2, PROCESS_W); 
         widths[LOCAL_ADDR_IDX] = std::cmp::max(largest_local_addr + 2, LOCAL_ADDR_W);
         widths[REMOTE_ADDR_IDX] = std::cmp::max(largest_remote_addr + 2, REMOTE_ADDR_W);
@@ -188,7 +190,7 @@ impl Socket {
         } else {
             print_socket_table_header(&widths, args.compact, &args.fields);
             for socket in socket_table{
-                print_socket_row(socket, &widths,args.compact, &args.fields);
+                print_socket_row(socket, &widths,args.compact, &args.fields, &args.uptime_format);
             }
             if !args.compact { print_table_line(&widths, &args.fields); }
         }

@@ -64,6 +64,41 @@ fn map_state_color(state: &String) -> ColoredString{
     }
 }
 
+pub fn get_formatted_uptime(uptime_arg: &Option<String>, socket_uptime: u64) -> String {
+    let hours = socket_uptime / 3600;
+    let days = hours / 24;
+    let minutes = socket_uptime % 3600 / 60;
+    let seconds = socket_uptime % 60;
+
+    let default_uptime_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
+
+    if let Some(format) = uptime_arg {
+        match format.to_lowercase().as_str() {
+            "clock" => {
+                default_uptime_str
+            }
+            "human" => {
+                format!("{}d {}h {}m {}s", days, hours, minutes, seconds)
+            }
+            "hours" => {
+                format!("{}h", hours)
+            }
+            "minutes" => {
+                format!("{}m", socket_uptime / 60)
+            }
+            "seconds" => {
+                format!("{}s", socket_uptime)
+            }
+            _ => {
+                eprintln!("error: Invalid uptime format");
+                std::process::exit(0);
+            }
+        }
+    } else {
+        default_uptime_str
+    }
+}
+
 pub fn print_table_line(widths: &[usize], fields: &Option<Vec<String>>) {
     let mut line_string = String::new();
     if let Some(fields) = fields {
@@ -82,7 +117,7 @@ pub fn print_table_line(widths: &[usize], fields: &Option<Vec<String>>) {
     println!("{}", line_string);
 }
 
-pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields: &Option<Vec<String>>) {
+pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields: &Option<Vec<String>>, uptime_arg: &Option<String>) {
     let port_str = format!("{}:{}", socket.port, socket.remote_port.map_or('-'.to_string(), |p| p.to_string()));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
@@ -97,7 +132,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
         }
     };
 
-    let uptime_str = format!("{:02}:{:02}:{:02}", socket.uptime / 3600, socket.uptime % 3600 / 60, socket.uptime % 60);
+    let uptime_str = get_formatted_uptime(uptime_arg, socket.uptime);
 
     let process_name = match socket.process_name.as_str() {
         "SYSTEM" => {

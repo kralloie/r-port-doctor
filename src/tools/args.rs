@@ -55,7 +55,10 @@ pub struct Args {
     pub younger_than: Option<u32>,
 
     #[arg(long = "fields", help = "Specify which fields should be present on the table output (all fields present by default)", value_name = "FIELD", num_args = 1..=8)]
-    pub fields: Option<Vec<String>>
+    pub fields: Option<Vec<String>>,
+
+    #[arg(long = "uptime", help = "Specify uptime format:\n - clock: HH:MM:SS\n - human: DDd HHh MMm SSs\n - hours\n - minutes\n - seconds")]
+    pub uptime_format: Option<String>
 }
 
 impl Args {
