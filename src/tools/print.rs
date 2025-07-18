@@ -78,7 +78,7 @@ pub fn get_formatted_uptime(uptime_arg: &Option<String>, socket_uptime: u64) -> 
                 default_uptime_str
             }
             "human" => {
-                format!("{}d {}h {}m {}s", days, hours, minutes, seconds)
+                format!("{:2}d {:2}h {:2}m {:2}s", days, hours, minutes, seconds)
             }
             "hours" => {
                 format!("{}h", hours)
