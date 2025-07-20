@@ -73,13 +73,13 @@ impl Socket {
             }
         }
 
-        if let Some(l) = &args.local_ip {
+        if let Some(l) = &args.local_address {
             if socket.local_addr.to_string().to_lowercase() != l.to_lowercase() {
                 return false
             }
         }
 
-        if let Some(r) = &args.remote_ip {
+        if let Some(r) = &args.remote_address {
             if let Some(remote_addr) = &socket.remote_addr {
                 if remote_addr.to_string().to_lowercase() != r.to_lowercase() {
                     return false

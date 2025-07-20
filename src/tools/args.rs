@@ -24,11 +24,11 @@ pub struct Args {
     #[arg(short = 'v', long = "ip-version", help = "Specify IP version 4 (IPv4) or 6 (IPv6). Defaults to IPv4.")]
     pub ip_version: Option<u8>,
 
-    #[arg(long = "local-ip", help = "Filter by local IP address")]
-    pub local_ip: Option<String>,
+    #[arg(long = "local-address", help = "Filter by local IP address")]
+    pub local_address: Option<String>,
 
-    #[arg(long = "remote-ip", help = "Filter by remote IP address")]
-    pub remote_ip: Option<String>,
+    #[arg(long = "remote-address", help = "Filter by remote IP address")]
+    pub remote_address: Option<String>,
 
     #[arg(long = "json", help = "Output results in JSON format")]
     pub json: bool,
@@ -68,8 +68,8 @@ impl Args {
         self.process_name.is_some() as usize +
         self.pid.is_some() as usize +
         self.state.is_some() as usize +
-        self.local_ip.is_some() as usize +
-        self.remote_ip.is_some() as usize +
+        self.local_address.is_some() as usize +
+        self.remote_address.is_some() as usize +
         self.no_system as usize +
         self.older_than.is_some() as usize +
         self.younger_than.is_some() as usize +
