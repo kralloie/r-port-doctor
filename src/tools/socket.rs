@@ -139,8 +139,7 @@ impl Socket {
                             socket_table.sort_by_key(|s| s.uptime);
                         }
                         _ => {
-                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'process-name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", field);
-                            std::process::exit(0);
+                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);                            std::process::exit(0);
                         }
                     }
                 }
@@ -162,7 +161,7 @@ impl Socket {
                             socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.uptime));
                         }
                         _ => {
-                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'process-name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", field);
+                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);
                             std::process::exit(0);
                         }
                     }
