@@ -58,7 +58,10 @@ pub struct Args {
     pub fields: Option<Vec<String>>,
 
     #[arg(long = "uptime", help = "Specify uptime format:\n - clock: HH:MM:SS\n - human: DDd HHh MMm SSs\n - hours\n - minutes\n - seconds")]
-    pub uptime_format: Option<String>
+    pub uptime_format: Option<String>,
+
+    #[arg(long = "range", help = "Filter rows by value ranges of the specified field", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
+    pub range: Option<Vec<String>>
 }
 
 impl Args {
@@ -72,6 +75,7 @@ impl Args {
         self.remote_ip.is_some() as usize +
         self.no_system as usize +
         self.older_than.is_some() as usize +
-        self.younger_than.is_some() as usize
+        self.younger_than.is_some() as usize +
+        self.range.is_some() as usize
     }
 }

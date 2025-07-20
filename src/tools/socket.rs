@@ -1,5 +1,5 @@
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
-use crate::tools::{args::Args, print::*};
+use crate::tools::{args::Args, print::*, range_filter::filter_range};
 use serde::Serialize;
 
 //--------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +32,13 @@ const REMOTE_ADDR_W: usize = 17;
 
 impl Socket {
     pub fn filter_socket_row (args: &Args, socket: &&Socket) -> bool {
+        
+        if let Some(range_args) = &args.range {
+            if !filter_range(range_args, socket, &args.ip_version) {
+                return false
+            }
+        } 
+
         if let Some(p) = args.port {
             if socket.port != p {
                 return false
