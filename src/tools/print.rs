@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::Path, sync::LazyLock};
 use colored::{ColoredString, Colorize};
 use crate::tools::socket::Socket;
 
-pub const OUTPUT_FIELDS: [&str; 8] = ["pid", "process_name", "port", "protocol", "local_address", "remote_address", "state", "uptime"];
+pub const OUTPUT_FIELDS: [&str; 8] = ["pid", "process-name", "port", "protocol", "local-address", "remote-address", "state", "uptime"];
 pub const PID_IDX: usize = 0;
 pub const PROCESS_IDX: usize = 1;
 pub const PORT_IDX: usize = 2;
@@ -16,11 +16,11 @@ pub const UPTIME_IDX: usize = 7;
 pub static FIELD_WIDTH_MAP: LazyLock<HashMap<&str, usize>> = LazyLock::new(|| {
     let mut map: HashMap<&str, usize> = HashMap::new();
     map.insert("pid", PID_IDX);
-    map.insert("process_name", PROCESS_IDX);
+    map.insert("process-name", PROCESS_IDX);
     map.insert("port", PORT_IDX);
     map.insert("protocol", PROTOCOL_IDX);
-    map.insert("local_address", LOCAL_ADDR_IDX);
-    map.insert("remote_address", REMOTE_ADDR_IDX);
+    map.insert("local-address", LOCAL_ADDR_IDX);
+    map.insert("remote-address", REMOTE_ADDR_IDX);
     map.insert("state", STATE_IDX);
     map.insert("uptime", UPTIME_IDX);
     map
@@ -154,7 +154,7 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
                 "pid" => {
                     socket_row_str.push_str(format!("{:^pid_w$}|", socket.pid, pid_w = widths[PID_IDX]).as_str());
                 }
-                "process_name" => {
+                "process-name" => {
                     socket_row_str.push_str(format!("{:>process_name_w$}|", process_name, process_name_w = widths[PROCESS_IDX]).as_str());
                 }
                 "port" => {
@@ -163,10 +163,10 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
                 "protocol" => {
                     socket_row_str.push_str(format!("{:^proto_w$}|", protocol_string, proto_w = widths[PROTOCOL_IDX]).as_str());
                 }
-                "local_address" => {
+                "local-address" => {
                     socket_row_str.push_str(format!("{:>local_addr_w$}|", socket.local_addr, local_addr_w = widths[LOCAL_ADDR_IDX]).as_str());
                 }
-                "remote_address" => {
+                "remote-address" => {
                     socket_row_str.push_str(format!("{:>remote_addr_w$}|", remote_addr, remote_addr_w = widths[REMOTE_ADDR_IDX]).as_str());
                 }
                 "state" => {
@@ -219,7 +219,7 @@ pub fn print_socket_table_header(widths: &[usize], compact: bool, fields: &Optio
                 "pid" => {
                     format!("{:^pid_w$}|", "PID".bold(), pid_w = widths[PID_IDX])
                 }
-                "process_name" => {
+                "process-name" => {
                     format!("{:^process_name_w$}|", "Process Name".bold(), process_name_w = widths[PROCESS_IDX])
                 }
                 "port" => {
@@ -228,10 +228,10 @@ pub fn print_socket_table_header(widths: &[usize], compact: bool, fields: &Optio
                 "protocol" => {
                     format!("{:^proto_w$}|", "Protocol".bold(), proto_w = widths[PROTOCOL_IDX])
                 }
-                "local_address" => {
+                "local-address" => {
                     format!("{:^local_addr_w$}|", "Local Address".bold(), local_addr_w = widths[LOCAL_ADDR_IDX])
                 }
-                "remote_address" => {
+                "remote-address" => {
                     format!("{:^remote_addr_w$}|", "Remote Address".bold(), remote_addr_w = widths[REMOTE_ADDR_IDX])
                 }
                 "state" => {

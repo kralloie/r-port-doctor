@@ -125,7 +125,7 @@ impl Socket {
                 "port" => {
                     socket_table.sort_by_key(|s| s.port);
                 }
-                "rport" => {
+                "remote-port" => {
                     socket_table.sort_by_key(|s| s.remote_port);
                 }
                 "name" => {
@@ -135,7 +135,7 @@ impl Socket {
                     socket_table.sort_by_key(|s| s.uptime);
                 }
                 _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'rport' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
+                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
                     std::process::exit(0)
                 }
             }
@@ -149,7 +149,7 @@ impl Socket {
                 "port" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.port));
                 }
-                "rport" => {
+                "remote-port" => {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.remote_port));
                 }
                 "name" => {
@@ -159,7 +159,7 @@ impl Socket {
                     socket_table.sort_by_key(|s| std::cmp::Reverse(s.uptime));
                 }
                 _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'rport' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
+                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
                     std::process::exit(0)
                 }
             }

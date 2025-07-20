@@ -21,7 +21,7 @@ pub struct Args {
     #[arg(short = 's', long, help = "Filter by connection state (e.g., LISTEN, ESTABLISHED)")]
     pub state: Option<String>,
 
-    #[arg(short = 'v', long = "ip-version", help = "Specify IP version (4 for IPv4, 6 for IPv6). Defaults to IPv4.")]
+    #[arg(short = 'v', long = "ip-version", help = "Specify IP version 4 (IPv4) or 6 (IPv6). Defaults to IPv4.")]
     pub ip_version: Option<u8>,
 
     #[arg(long = "local-ip", help = "Filter by local IP address")]
@@ -36,13 +36,13 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort-asc", help = "Sort output ascending by specified field: pid, name, port, remote port (rport) or uptime", value_name = "FIELD")]
+    #[arg(long = "sort-asc", help = "Sort output in ascending order by field: pid, name, port, remote port (remote-port) or uptime", value_name = "FIELD")]
     pub sort_asc_by: Option<String>,
 
-    #[arg(long = "sort-desc", help = "Sort output descending by specified field: pid, name, port, remote port (rport) or uptime", value_name = "FIELD")]
+    #[arg(long = "sort-desc", help = "Sort output in descending order by field: pid, name, port, remote port (remote-port) or uptime", value_name = "FIELD")]
     pub sort_desc_by: Option<String>,
 
-    #[arg(long = "resolve-hostname", help = "Tries to replace remote IP address with resolved hostname through DNS lookup if possible (can take few seconds)")]
+    #[arg(long = "resolve-hostname", help = "Resolve remote IP addresses to hostnames using DNS (may take a few seconds for IPv4 addresses)")]
     pub resolve_hostname: bool,
 
     #[arg(long = "compact", help = "Removes table borders from output")]
@@ -54,13 +54,13 @@ pub struct Args {
     #[arg(long = "younger-than", help = "Filter connections by uptime being younger than provided seconds", value_name = "SECONDS")]
     pub younger_than: Option<u32>,
 
-    #[arg(long = "fields", help = "Specify which fields should be present on the table output (all fields present by default)", value_name = "FIELD", num_args = 1..=8)]
+    #[arg(long = "fields", help = "Show only the specified fields in the table (all shown by default)", value_name = "FIELD", num_args = 1..=8)]
     pub fields: Option<Vec<String>>,
 
-    #[arg(long = "uptime", help = "Specify uptime format:\n - clock: HH:MM:SS\n - human: DDd HHh MMm SSs\n - hours\n - minutes\n - seconds")]
+    #[arg(long = "uptime", help = "Specify uptime format:\n  - clock: HH:MM:SS\n  - human: DDd HHh MMm SSs\n  - hours\n  - minutes\n  - seconds")]
     pub uptime_format: Option<String>,
 
-    #[arg(long = "range", help = "Filter rows by value ranges of the specified field", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
+    #[arg(long = "range", help = "Filter rows by value ranges of the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - uptime (uses seconds)\n  - local-address\n  - remote-address", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
     pub range: Option<Vec<String>>
 }
 
