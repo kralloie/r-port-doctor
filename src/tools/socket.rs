@@ -117,50 +117,59 @@ impl Socket {
     }
 
     pub fn sort_socket_table(socket_table: &mut Vec<Socket>, args: &Args) {
-        if let Some(sort_arg) = args.sort_asc_by.clone() {
-            match sort_arg.to_lowercase().as_str() {
-                "pid" => {
-                    socket_table.sort_by_key(|s| s.pid);
-                },
-                "port" => {
-                    socket_table.sort_by_key(|s| s.port);
+        if let Some(sort_arg) = args.sort_by.clone() {
+            let order = sort_arg[0].to_lowercase();
+            let field = sort_arg[1].to_lowercase();
+            match order.as_str() {
+                "asc" => {
+                    match field.as_str() {
+                        "pid" => {
+                            socket_table.sort_by_key(|s| s.pid);
+                        }
+                        "port" => {
+                            socket_table.sort_by_key(|s| s.port);
+                        }
+                        "remote-port" => {
+                            socket_table.sort_by_key(|s| s.remote_port);
+                        }
+                        "process-name" => {
+                            socket_table.sort_by_key(|s| s.process_name.clone());
+                        }
+                        "uptime" => {
+                            socket_table.sort_by_key(|s| s.uptime);
+                        }
+                        _ => {
+                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'process-name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", field);
+                            std::process::exit(0);
+                        }
+                    }
                 }
-                "remote-port" => {
-                    socket_table.sort_by_key(|s| s.remote_port);
-                }
-                "name" => {
-                    socket_table.sort_by_key(|s| s.process_name.clone().to_lowercase());
-                }
-                "uptime" => {
-                    socket_table.sort_by_key(|s| s.uptime);
+                "desc" => {
+                    match field.as_str() {
+                        "pid" => {
+                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.pid));
+                        }
+                        "port" => {
+                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.port));
+                        }
+                        "remote-port" => {
+                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.remote_port));
+                        }
+                        "process-name" => {
+                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.process_name.clone()));
+                        }
+                        "uptime" => {
+                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.uptime));
+                        }
+                        _ => {
+                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'process-name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", field);
+                            std::process::exit(0);
+                        }
+                    }
                 }
                 _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
-                    std::process::exit(0)
-                }
-            }
-        }
-
-        if let Some(sort_arg) = args.sort_desc_by.clone() {
-            match sort_arg.to_lowercase().as_str() {
-                "pid" => {
-                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.pid));
-                }
-                "port" => {
-                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.port));
-                }
-                "remote-port" => {
-                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.remote_port));
-                }
-                "name" => {
-                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.process_name.clone().to_lowercase()));
-                }
-                "uptime" => {
-                    socket_table.sort_by_key(|s| std::cmp::Reverse(s.uptime));
-                }
-                _ => {
-                    eprintln!("error: Invalid sort argument: '{}'\n\nAvailable arguments:\n\n- 'pid' (Process ID)\n- 'port' (Local Port)\n- 'remote-port' (Remote Port)\n- 'name' (Process Name)\n- 'uptime' (Time in seconds since connection started)", sort_arg);
-                    std::process::exit(0)
+                    eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order);
+                    std::process::exit(0);
                 }
             }
         }

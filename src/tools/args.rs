@@ -36,11 +36,8 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort-asc", help = "Sort output in ascending order by field: pid, name, port, remote port (remote-port) or uptime", value_name = "FIELD")]
-    pub sort_asc_by: Option<String>,
-
-    #[arg(long = "sort-desc", help = "Sort output in descending order by field: pid, name, port, remote port (remote-port) or uptime", value_name = "FIELD")]
-    pub sort_desc_by: Option<String>,
+    #[arg(long = "sort", help = "Sort output in the specified order by the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - process-name\n  - uptime", value_names = ["ORDER", "FIELD"], num_args = 2)]
+    pub sort_by: Option<Vec<String>>,
 
     #[arg(long = "resolve-hostname", help = "Resolve remote IP addresses to hostnames using DNS (may take a few seconds for IPv4 addresses)")]
     pub resolve_hostname: bool,
@@ -57,7 +54,7 @@ pub struct Args {
     #[arg(long = "fields", help = "Show only the specified fields in the table (all shown by default)", value_name = "FIELD", num_args = 1..=8)]
     pub fields: Option<Vec<String>>,
 
-    #[arg(long = "uptime", help = "Specify uptime format:\n  - clock: HH:MM:SS\n  - human: DDd HHh MMm SSs\n  - hours\n  - minutes\n  - seconds")]
+    #[arg(long = "uptime", help = "Specify uptime format:\n  - clock (HH:MM:SS)\n  - human (DDd HHh MMm SSs)\n  - hours\n  - minutes\n  - seconds")]
     pub uptime_format: Option<String>,
 
     #[arg(long = "range", help = "Filter rows by value ranges of the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - uptime (uses seconds)\n  - local-address\n  - remote-address", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
