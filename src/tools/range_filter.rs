@@ -31,20 +31,20 @@ pub fn check_address_range<T: FromStr + Copy + PartialOrd>(default_min: T, defau
 pub fn filter_range(range_args: &Vec<String>, socket: &&Socket, ip_version: &Option<u8>) -> bool {
     match range_args[0].to_lowercase().as_str() {
         "pid" => {
-            check_field_range(std::u32::MIN, std::u32::MAX, range_args, socket.pid)
+            check_field_range(u32::MIN, u32::MAX, range_args, socket.pid)
         }
         "port" => {
-            check_field_range(std::u16::MIN, std::u16::MAX, range_args, socket.port)
+            check_field_range(u16::MIN, u16::MAX, range_args, socket.port)
         }
         "remote-port" => {
             if let Some(remote_port) = socket.remote_port {
-                check_field_range(std::u16::MIN, std::u16::MAX, range_args, remote_port)
+                check_field_range(u16::MIN, u16::MAX, range_args, remote_port)
             } else {
                 false
             }
         }
         "uptime" => {
-            check_field_range(std::u64::MIN, std::u64::MAX, range_args, socket.uptime)
+            check_field_range(u64::MIN, u64::MAX, range_args, socket.uptime)
         }
         "local-address" => {
             if let Some(version) = ip_version {
