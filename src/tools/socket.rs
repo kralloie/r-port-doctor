@@ -120,54 +120,14 @@ impl Socket {
         if let Some(sort_arg) = args.sort_by.clone() {
             let order = sort_arg[0].to_lowercase();
             let field = sort_arg[1].to_lowercase();
-            match order.as_str() {
-                "asc" => {
-                    match field.as_str() {
-                        "pid" => {
-                            socket_table.sort_by_key(|s| s.pid);
-                        }
-                        "port" => {
-                            socket_table.sort_by_key(|s| s.port);
-                        }
-                        "remote-port" => {
-                            socket_table.sort_by_key(|s| s.remote_port);
-                        }
-                        "process-name" => {
-                            socket_table.sort_by_key(|s| s.process_name.clone());
-                        }
-                        "uptime" => {
-                            socket_table.sort_by_key(|s| s.uptime);
-                        }
-                        _ => {
-                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);                            std::process::exit(0);
-                        }
-                    }
-                }
-                "desc" => {
-                    match field.as_str() {
-                        "pid" => {
-                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.pid));
-                        }
-                        "port" => {
-                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.port));
-                        }
-                        "remote-port" => {
-                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.remote_port));
-                        }
-                        "process-name" => {
-                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.process_name.clone()));
-                        }
-                        "uptime" => {
-                            socket_table.sort_by_key(|s: &Socket| std::cmp::Reverse(s.uptime));
-                        }
-                        _ => {
-                            eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);
-                            std::process::exit(0);
-                        }
-                    }
-                }
+            match field.as_str() {
+                "pid" => sort_by(order.as_str(), socket_table, |s| s.pid),
+                "port" => sort_by(order.as_str(), socket_table, |s| s.port),
+                "remote-port" => sort_by(order.as_str(), socket_table, |s| s.remote_port),
+                "process-name" => sort_by(order.as_str(), socket_table, |s| s.process_name.clone()),
+                "uptime" => sort_by(order.as_str(), socket_table, |s| s.uptime),
                 _ => {
-                    eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order);
+                    eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);
                     std::process::exit(0);
                 }
             }
@@ -229,6 +189,21 @@ pub fn map_tcp_state(state: u32) -> String {
         11 => "TIME_WAIT".to_string(),
         12 => "DELETE_TCB".to_string(),
         _ => "UNKNOWN".to_string(),
+    }
+}
+
+fn sort_by<K: Ord, F: Fn(&Socket) -> K>(order: &str, table: &mut Vec<Socket>, key_field_fn: F) {
+    match order {
+        "asc" => {
+            table.sort_by_key(key_field_fn);
+        }
+        "desc" => {
+            table.sort_by_key(|s| std::cmp::Reverse(key_field_fn(s)));
+        }
+        _ => {
+            eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order);
+            std::process::exit(0);
+        }
     }
 }
 
