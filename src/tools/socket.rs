@@ -26,9 +26,9 @@ const PORT_W: usize = 14;
 const PROTOCOL_W: usize = 10;
 const STATE_W: usize = 15;
 const UPTIME_W: usize = 12;
-const PROCESS_W: usize = 12;
-const LOCAL_ADDR_W: usize = 17;
-const REMOTE_ADDR_W: usize = 17;
+const PROCESS_W: usize = 14;
+const LOCAL_ADDR_W: usize = 15;
+const REMOTE_ADDR_W: usize = 16;
 
 impl Socket {
     pub fn filter_socket_row (args: &Args, socket: &&Socket) -> bool {
