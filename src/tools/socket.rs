@@ -1,3 +1,5 @@
+use std::{net::{IpAddr, Ipv4Addr, Ipv6Addr}, str::FromStr};
+
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
 use crate::tools::{args::Args, print::*, range_filter::filter_range};
 use serde::Serialize;
@@ -126,6 +128,33 @@ impl Socket {
                 "remote-port" => sort_by(order.as_str(), socket_table, |s| s.remote_port),
                 "process-name" => sort_by(order.as_str(), socket_table, |s| s.process_name.clone()),
                 "uptime" => sort_by(order.as_str(), socket_table, |s| s.uptime),
+                // Ipv4Addr and Ipv6Addr are mapped into IpAddr so the case returns the same type no matter the IP version
+                "local-address" => sort_by(order.as_str(), socket_table, |s| {
+                    if matches!(args.ip_version, Some(version) if version == 6) {
+                        Ipv6Addr::from_str(&s.local_addr)
+                            .map(IpAddr::V6) 
+                            .unwrap_or(IpAddr::V6(Ipv6Addr::new(0,0,0,0,0,0,0,0)))
+                    } else {
+                        Ipv4Addr::from_str(&s.local_addr)
+                            .map(IpAddr::V4)
+                            .unwrap_or(IpAddr::V4(Ipv4Addr::new(0,0,0,0)))
+                    }
+                }),
+                "remote-address" => sort_by(order.as_str(), socket_table, |s| {
+                    if matches!(args.ip_version, Some(version) if version == 6) {
+                        s.remote_addr
+                            .as_ref()
+                            .and_then(|addr| Ipv6Addr::from_str(addr).ok())
+                            .map(IpAddr::V6)
+                            .unwrap_or(IpAddr::V6(Ipv6Addr::new(0,0,0,0,0,0,0,0)))
+                    } else {
+                        s.remote_addr
+                            .as_ref()
+                            .and_then(|addr| Ipv4Addr::from_str(addr).ok())
+                            .map(IpAddr::V4)
+                            .unwrap_or(IpAddr::V4(Ipv4Addr::new(0,0,0,0)))
+                    }
+                }),
                 _ => {
                     eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);
                     std::process::exit(0);

@@ -36,7 +36,7 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort", help = "Sort output in the specified order by the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - process-name\n  - uptime", value_names = ["ORDER", "FIELD"], num_args = 2)]
+    #[arg(long = "sort", help = "Sort output in the specified order by the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - process-name\n  - uptime\n  - local-address\n  - remote-address", value_names = ["ORDER", "FIELD"], num_args = 2)]
     pub sort_by: Option<Vec<String>>,
 
     #[arg(long = "resolve-hostname", help = "Resolve remote IP addresses to hostnames using DNS (may take a few seconds for IPv4 addresses)")]
