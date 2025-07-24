@@ -99,6 +99,11 @@ pub fn map_state_color(state: &String) -> ColoredString{
 
 pub fn visible_length(s: &ColoredString) -> usize {
     strip_ansi_escapes::strip(s.to_string())
-        .map(|bytes| String::from_utf8_lossy(&bytes).len())
+        .map(|bytes| {
+            String::from_utf8_lossy(&bytes)
+                .chars()
+                .filter(|c| *c != '\n' && *c != '\r')
+                .count()
+        })
         .unwrap_or(0)
 }

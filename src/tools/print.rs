@@ -190,28 +190,89 @@ fn print_padded_line(width: usize, left_str: ColoredString, right_str: ColoredSt
 pub fn print_socket_stats(socket_table: &Vec<Socket>) {
     let stats = get_socket_stats(socket_table);
     let width: usize = 50;
-    print_padded_line(width, String::from("Connections:").bold().underline(), format!("{}", stats.connection_count).bold().blue());
-    println!("");
-    print_padded_line(width, String::from("  - TCP:").bold(),format!("{}", stats.tcp_count).bold().blue());
-    print_padded_line(width, String::from("  - UDP:").bold(),format!("{}", stats.udp_count).bold().blue());
-    print!("\n\n");
-    print_padded_line(width, String::from("Unique PIDs:").bold().underline(), format!("{}", stats.pid_count).bold().blue());
-    println!("");
-    print_padded_line(width, String::from("Top PID:").bold().underline(), format!("{} ({}) ({})", stats.top_pid.0.0.to_string().bold().cyan(), stats.top_pid.0.1.bold(), stats.top_pid.1.to_string().bold().blue()).normal());
-    print!("\n\n");
-    println!("{}", String::from("Ports:").bold().underline());
-    println!("");
-    print_padded_line(width, String::from("  - Local ports:").bold(), format!("{}", stats.local_port_count).bold().blue());
-    print_padded_line(width, String::from("  - Remote ports:").bold(), format!("{}", stats.remote_port_count).bold().blue());
-    print!("\n\n");
-    println!("{}", String::from("Addresses:").bold().underline());
-    println!("");
-    print_padded_line(width, String::from("  - Local addreses:").bold(), format!("{}", stats.local_address_count).bold().blue());
-    print_padded_line(width, String::from("  - Remote addresses:").bold(), format!("{}", stats.remote_address_count).bold().blue());
-    print_padded_line(width, String::from("  - Top remote address:").bold(), format!("{} ({})", stats.top_remote_address.0.bold().cyan(), stats.top_remote_address.1.to_string().bold().blue()).normal(),);
-    print!("\n\n");
-    println!("{}", String::from("Uptimes:").bold().underline());
-    println!("");
-    print_padded_line(width, String::from("  - Youngest connection:").bold(), format!("{}", stats.youngest_connection).bold().green());
-    print_padded_line(width, String::from("  - Oldest connection:").bold(), format!("{}", stats.oldest_connection).bold().red());
+
+    print_padded_line(
+        width, 
+        String::from("Connections:").bold().underline(), 
+        format!("{}\n", stats.connection_count).bold().blue()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - TCP:").bold(),
+        format!("{}", stats.tcp_count).bold().blue()
+    );
+    print_padded_line(
+        width, 
+        String::from("      ESTABLISHED:").bold().green(),
+        format!("{}", stats.established_count).bold().green()
+    );
+    print_padded_line(
+        width, 
+        String::from("      LISTEN:").bold().cyan(),
+        format!("{}", stats.listen_count).bold().cyan()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - UDP:").bold(),
+        format!("{}\n\n", stats.udp_count).bold().blue()
+    );
+
+    print_padded_line(
+        width, 
+        String::from("Unique PIDs:").bold().underline(), 
+        format!("{}\n", stats.pid_count).bold().blue()
+    );
+    print_padded_line(
+        width,
+        String::from("Top PID:").bold().underline(),
+        format!("{} ({}) ({})\n\n",
+            stats.top_pid.0.0.to_string().bold().cyan(),
+            stats.top_pid.0.1.bold(),
+            stats.top_pid.1.to_string().bold().blue())
+        .normal()
+    );
+
+    println!("{}\n", String::from("Ports:").bold().underline());
+    print_padded_line(
+        width, 
+        String::from("  - Local ports:").bold(), 
+        format!("{}", stats.local_port_count).bold().blue()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - Remote ports:").bold(), 
+        format!("{}\n\n", stats.remote_port_count).bold().blue()
+    );
+
+    println!("{}\n", String::from("Addresses:").bold().underline());
+    print_padded_line(
+        width, 
+        String::from("  - Local addreses:").bold(), 
+        format!("{}", stats.local_address_count).bold().blue()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - Remote addresses:").bold(), 
+        format!("{}", stats.remote_address_count).bold().blue()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - Top remote address:").bold(), 
+        format!("{} ({})\n\n", 
+            stats.top_remote_address.0.bold().cyan(), 
+            stats.top_remote_address.1.to_string().bold().blue()
+        ).normal()
+    );
+
+    println!("{}\n", String::from("Uptimes:").bold().underline());
+    print_padded_line(
+        width, 
+        String::from("  - Youngest connection:").bold(), 
+        format!("{}", stats.youngest_connection).bold().green()
+    );
+    print_padded_line(
+        width, 
+        String::from("  - Oldest connection:").bold(), 
+        format!("{}", stats.oldest_connection).bold().red()
+    );
 }

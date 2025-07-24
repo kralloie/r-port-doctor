@@ -4,6 +4,8 @@ use crate::tools::{print_utils::get_formatted_uptime, socket::Socket};
 pub struct Stats {
     pub connection_count: usize,
     pub tcp_count: usize,
+    pub established_count: usize,
+    pub listen_count: usize,
     pub udp_count: usize,
     pub pid_count: usize,
     pub local_port_count: usize,
@@ -26,6 +28,8 @@ pub fn get_socket_stats(socket_table: &Vec<Socket>) -> Stats {
     
     let udp_count = socket_table.iter().filter(|s| s.protocol == "UDP").count();
     let tcp_count = socket_table.iter().filter(|s| s.protocol == "TCP").count();
+    let established_count = socket_table.iter().filter(|s| s.state == "ESTABLISHED").count();
+    let listen_count = socket_table.iter().filter(|s| s.state == "LISTEN").count();
 
     let mut youngest_connection: u64 = u64::MAX;
     let mut oldest_connection: u64 = u64::MIN;
@@ -65,6 +69,8 @@ pub fn get_socket_stats(socket_table: &Vec<Socket>) -> Stats {
     Stats {
         connection_count,
         tcp_count,
+        established_count,
+        listen_count,
         udp_count,
         pid_count: pid_set.len(),
         local_port_count: local_port_set.len(),
