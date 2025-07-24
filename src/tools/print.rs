@@ -212,5 +212,5 @@ pub fn print_socket_stats(socket_table: &Vec<Socket>) {
     println!("{}", String::from("Uptimes:").bold().underline());
     println!("");
     print_padded_line(width, String::from("  - Youngest connection:").bold(), format!("{}", stats.youngest_connection).bold().green());
-    print_padded_line(width, String::from("  - Local addreses:").bold(), format!("{}", stats.oldest_connection).bold().red());
+    print_padded_line(width, String::from("  - Oldest connection:").bold(), format!("{}", stats.oldest_connection).bold().red());
 }
