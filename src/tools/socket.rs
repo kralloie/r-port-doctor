@@ -1,6 +1,6 @@
 use std::{net::{IpAddr, Ipv4Addr, Ipv6Addr}, str::FromStr};
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
-use crate::tools::{args::Args, print::*, range_filter::filter_range};
+use crate::tools::{args::Args, print::*, print_utils::*, range_filter::filter_range};
 use serde::Serialize;
 
 //--------------------------------------------------------------------------------------------------------------------------

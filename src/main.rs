@@ -2,9 +2,9 @@ use clap::Parser;
 use r_port_doctor::tools::args::Args;
 use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::get_sockets::get_sockets;
-use r_port_doctor::tools::print::OUTPUT_FIELDS;
+use r_port_doctor::tools::print_utils::OUTPUT_FIELDS;
 use r_port_doctor::tools::socket::{Socket};
-use r_port_doctor::tools::stats::print_socket_stats;
+use r_port_doctor::tools::print::print_socket_stats;
 fn main() {     
     #[cfg(windows)]
     {
