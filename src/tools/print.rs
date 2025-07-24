@@ -205,6 +205,7 @@ pub fn print_socket_stats(socket_table: &Vec<Socket>) {
     print_padded_line(width, String::from("  - Remote ports:").bold(), format!("{}", stats.remote_port_count).bold().blue());
     print!("\n\n");
     println!("{}", String::from("Addresses:").bold().underline());
+    println!("");
     print_padded_line(width, String::from("  - Local addreses:").bold(), format!("{}", stats.local_address_count).bold().blue());
     print_padded_line(width, String::from("  - Remote addresses:").bold(), format!("{}", stats.remote_address_count).bold().blue());
     print_padded_line(width, String::from("  - Top remote address:").bold(), format!("{} ({})", stats.top_remote_address.0.bold().cyan(), stats.top_remote_address.1.to_string().bold().blue()).normal(),);
