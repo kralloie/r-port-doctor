@@ -58,7 +58,10 @@ pub struct Args {
     pub uptime_format: Option<String>,
 
     #[arg(long = "range", help = "Filter rows by value ranges of the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - uptime (uses seconds)\n  - local-address\n  - remote-address", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
-    pub range: Option<Vec<String>>
+    pub range: Option<Vec<String>>,
+
+    #[arg(long = "stats", help = "Outputs various statistics related to the socket table instead of the table itself")]
+    pub stats: bool
 }
 
 impl Args {

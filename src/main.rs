@@ -4,6 +4,7 @@ use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::get_sockets::get_sockets;
 use r_port_doctor::tools::print::OUTPUT_FIELDS;
 use r_port_doctor::tools::socket::{Socket};
+use r_port_doctor::tools::stats::print_socket_stats;
 fn main() {     
     #[cfg(windows)]
     {
@@ -48,5 +49,9 @@ fn main() {
     
     Socket::filter_socket_table(&mut sockets, &args, argc);
     Socket::sort_socket_table(&mut sockets, &args);
-    Socket::print_socket_table(&sockets, &args);
+    if args.stats {
+        print_socket_stats(&sockets);
+    } else {
+        Socket::print_socket_table(&sockets, &args);
+    }
 }

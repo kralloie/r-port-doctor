@@ -9,3 +9,4 @@ pub mod get_uptime;
 pub mod dns_lookup;
 pub mod get_sockets;
 pub mod range_filter;
+pub mod stats;
