@@ -31,20 +31,18 @@ fn main() {
     }
 
     if let Some(fields) = &args.fields {
-        let mut selected_fields: Vec<String> = Vec::new();
-        fields.iter().for_each(|field| {
-            let field = field.to_lowercase();
-            if selected_fields.contains(&field) {
+        let mut seen_fields = std::collections::HashSet::new();
+        for field in fields {
+            let lower_field = field.to_lowercase();
+            if !seen_fields.insert(lower_field.clone()) {
                 eprintln!("error: Repeated field '{}'", field);
                 std::process::exit(0);
             }
-            if !OUTPUT_FIELDS.contains(&field.as_str()) {
+            if !OUTPUT_FIELDS.contains(&lower_field.as_str()) {
                 eprintln!("error: Invalid field: '{}'\n\nAvailable fields:\n\n- pid\n- process_name\n- port\n- protocol\n- local_address\n- remote_address\n- state\n- uptime", field);
                 std::process::exit(0);
-            } else {
-                selected_fields.push(field.clone());
             }
-        });
+        }
     }
     
     Socket::filter_socket_table(&mut sockets, &args, argc);
