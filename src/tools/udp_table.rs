@@ -67,9 +67,7 @@ pub fn get_udp_sockets() -> Vec<Socket> {
                             udp_sockets.push(
                                 Socket {
                                     process_name: match row.dwOwningPid {
-                                        4 => {
-                                            "SYSTEM".to_string()
-                                        }
+                                        4 => "SYSTEM".to_string(),
                                         _ => {
                                             if let Some(process_name) = get_process_name_toolhelp(row.dwOwningPid) {
                                                 process_name
@@ -161,9 +159,7 @@ pub fn get_udp_sockets_ipv6() -> Vec<Socket> {
                             udp_sockets.push(
                                 Socket {
                                     process_name: match row.dwOwningPid {
-                                        4 => {
-                                            "SYSTEM".to_string()
-                                        }
+                                        4 => "SYSTEM".to_string(),
                                         _ => {
                                             if let Some(process_name) = get_process_name_toolhelp(row.dwOwningPid) {
                                                 process_name

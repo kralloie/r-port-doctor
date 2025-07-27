@@ -53,21 +53,11 @@ pub fn get_formatted_uptime(uptime_arg: &Option<String>, socket_uptime: u64) -> 
 
     if let Some(format) = uptime_arg {
         match format.to_lowercase().as_str() {
-            "clock" => {
-                default_uptime_str
-            }
-            "human" => {
-                format!("{:2}d {:2}h {:2}m {:2}s", days, hours, minutes, seconds)
-            }
-            "hours" => {
-                format!("{}h", hours)
-            }
-            "minutes" => {
-                format!("{}m", socket_uptime / 60)
-            }
-            "seconds" => {
-                format!("{}s", socket_uptime)
-            }
+            "clock" => default_uptime_str,
+            "human" => format!("{:2}d {:2}h {:2}m {:2}s", days, hours, minutes, seconds),
+            "hours" => format!("{}h", hours),
+            "minutes" => format!("{}m", socket_uptime / 60),
+            "seconds" => format!("{}s", socket_uptime),
             _ => {
                 eprintln!("error: Invalid uptime format");
                 std::process::exit(0);

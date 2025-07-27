@@ -210,12 +210,8 @@ impl Socket {
 
 fn sort_by<K: Ord, F: Fn(&Socket) -> K>(order: &str, table: &mut Vec<Socket>, key_field_fn: F) {
     match order {
-        "asc" => {
-            table.sort_by_key(key_field_fn);
-        }
-        "desc" => {
-            table.sort_by_key(|s| std::cmp::Reverse(key_field_fn(s)));
-        }
+        "asc" => table.sort_by_key(key_field_fn),
+        "desc" => table.sort_by_key(|s| std::cmp::Reverse(key_field_fn(s))),
         _ => {
             eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order);
             std::process::exit(0);

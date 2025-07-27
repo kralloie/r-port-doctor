@@ -25,29 +25,17 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
     let port_str = format!("{}:{}", socket.port, socket.remote_port.map_or('-'.to_string(), |p| p.to_string()));
     let remote_addr = socket.remote_addr.as_deref().unwrap_or(" ");
     let protocol_string = match socket.protocol {
-        "UDP" => {
-            "UDP/IP".bold().blue()
-        }
-        "TCP" => {
-            "TCP/IP".bold().green()
-        }
-        _ => {
-            "unknown".bold().red()
-        }
+        "UDP" => "UDP/IP".bold().blue(),
+        "TCP" => "TCP/IP".bold().green(),
+        _ => "unknown".bold().red()
     };
 
     let uptime_str = get_formatted_uptime(uptime_arg, socket.uptime);
 
     let process_name = match socket.process_name.as_str() {
-        "SYSTEM" => {
-            "SYSTEM".bold().cyan()
-        }
-        "unknown" => {
-            "unknown".bold().red()
-        }
-        _ => {
-            ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold()
-        }
+        "SYSTEM" => "SYSTEM".bold().cyan(),
+        "unknown" => "unknown".bold().red(),
+        _ => ansi_hyperlink(&socket.process_name, socket.executable_path.as_deref(), widths[1]).bold()
     };
     let mut socket_row_str: String = String::new();
 
@@ -55,30 +43,14 @@ pub fn print_socket_row(socket: &Socket, widths: &[usize], compact: bool, fields
         fields.iter()
         .for_each(|field| {
             match field.to_lowercase().as_str() {
-                "pid" => {
-                    socket_row_str.push_str(format!("{:^pid_w$}|", socket.pid, pid_w = widths[PID_IDX]).as_str());
-                }
-                "process-name" => {
-                    socket_row_str.push_str(format!("{:>process_name_w$}|", process_name, process_name_w = widths[PROCESS_IDX]).as_str());
-                }
-                "port" => {
-                    socket_row_str.push_str(format!("{:^port_w$}|", port_str, port_w = widths[PORT_IDX]).as_str());
-                }
-                "protocol" => {
-                    socket_row_str.push_str(format!("{:^proto_w$}|", protocol_string, proto_w = widths[PROTOCOL_IDX]).as_str());
-                }
-                "local-address" => {
-                    socket_row_str.push_str(format!("{:>local_addr_w$}|", socket.local_addr, local_addr_w = widths[LOCAL_ADDR_IDX]).as_str());
-                }
-                "remote-address" => {
-                    socket_row_str.push_str(format!("{:>remote_addr_w$}|", remote_addr, remote_addr_w = widths[REMOTE_ADDR_IDX]).as_str());
-                }
-                "state" => {
-                    socket_row_str.push_str(format!("{:^state_w$}|", map_state_color(&socket.state), state_w = widths[STATE_IDX]).as_str());
-                }
-                "uptime" => {
-                    socket_row_str.push_str(format!("{:^uptime_w$}|", uptime_str, uptime_w = widths[UPTIME_IDX]).as_str());
-                }
+                "pid" => socket_row_str.push_str(format!("{:^pid_w$}|", socket.pid, pid_w = widths[PID_IDX]).as_str()),
+                "process-name" => socket_row_str.push_str(format!("{:>process_name_w$}|", process_name, process_name_w = widths[PROCESS_IDX]).as_str()),
+                "port" => socket_row_str.push_str(format!("{:^port_w$}|", port_str, port_w = widths[PORT_IDX]).as_str()),
+                "protocol" => socket_row_str.push_str(format!("{:^proto_w$}|", protocol_string, proto_w = widths[PROTOCOL_IDX]).as_str()),
+                "local-address" => socket_row_str.push_str(format!("{:>local_addr_w$}|", socket.local_addr, local_addr_w = widths[LOCAL_ADDR_IDX]).as_str()),
+                "remote-address" => socket_row_str.push_str(format!("{:>remote_addr_w$}|", remote_addr, remote_addr_w = widths[REMOTE_ADDR_IDX]).as_str()),
+                "state" => socket_row_str.push_str(format!("{:^state_w$}|", map_state_color(&socket.state), state_w = widths[STATE_IDX]).as_str()),
+                "uptime" => socket_row_str.push_str(format!("{:^uptime_w$}|", uptime_str, uptime_w = widths[UPTIME_IDX]).as_str()),
                 _ => {}
             }
         });
@@ -120,30 +92,14 @@ pub fn print_socket_table_header(widths: &[usize], compact: bool, fields: &Optio
         for field in fields {
             if header.chars().last() != Some('|') { header.push('|') ;}
             let column_header = match field.to_lowercase().as_str() {
-                "pid" => {
-                    format!("{:^pid_w$}|", "PID".bold(), pid_w = widths[PID_IDX])
-                }
-                "process-name" => {
-                    format!("{:^process_name_w$}|", "Process Name".bold(), process_name_w = widths[PROCESS_IDX])
-                }
-                "port" => {
-                    format!("{:^port_w$}|", "Port".bold(), port_w = widths[PORT_IDX])
-                }
-                "protocol" => {
-                    format!("{:^proto_w$}|", "Protocol".bold(), proto_w = widths[PROTOCOL_IDX])
-                }
-                "local-address" => {
-                    format!("{:^local_addr_w$}|", "Local Address".bold(), local_addr_w = widths[LOCAL_ADDR_IDX])
-                }
-                "remote-address" => {
-                    format!("{:^remote_addr_w$}|", "Remote Address".bold(), remote_addr_w = widths[REMOTE_ADDR_IDX])
-                }
-                "state" => {
-                    format!("{:^state_w$}|", "State".bold(), state_w = widths[STATE_IDX])
-                }
-                "uptime" => {
-                    format!("{:^uptime_w$}|", "Uptime".bold(), uptime_w = widths[UPTIME_IDX])
-                }
+                "pid" => format!("{:^pid_w$}|", "PID".bold(), pid_w = widths[PID_IDX]),
+                "process-name" => format!("{:^process_name_w$}|", "Process Name".bold(), process_name_w = widths[PROCESS_IDX]),
+                "port" => format!("{:^port_w$}|", "Port".bold(), port_w = widths[PORT_IDX]),
+                "protocol" => format!("{:^proto_w$}|", "Protocol".bold(), proto_w = widths[PROTOCOL_IDX]),
+                "local-address" => format!("{:^local_addr_w$}|", "Local Address".bold(), local_addr_w = widths[LOCAL_ADDR_IDX]),
+                "remote-address" => format!("{:^remote_addr_w$}|", "Remote Address".bold(), remote_addr_w = widths[REMOTE_ADDR_IDX]),
+                "state" => format!("{:^state_w$}|", "State".bold(), state_w = widths[STATE_IDX]),
+                "uptime" => format!("{:^uptime_w$}|", "Uptime".bold(), uptime_w = widths[UPTIME_IDX]),
                 _ => continue,
             };
             header.push_str(&column_header);
