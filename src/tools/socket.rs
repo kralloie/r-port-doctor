@@ -1,4 +1,5 @@
 use std::{net::{IpAddr, Ipv4Addr, Ipv6Addr}, str::FromStr};
+use regex::Regex;
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
 use crate::tools::{args::Args, print::*, print_utils::*, range_filter::filter_range};
 use serde::Serialize;
@@ -57,8 +58,15 @@ impl Socket {
         }
 
         if let Some(n) = &args.process_name {
-            if !socket.process_name.to_lowercase().contains(n.to_lowercase().as_str()) {
-                return false
+            match Regex::new(&n) {
+                Ok(re) => {
+                    if !re.is_match(&socket.process_name) {
+                        return false
+                    }
+                }
+                Err(_) => {
+                    return false
+                }
             }
         }
 

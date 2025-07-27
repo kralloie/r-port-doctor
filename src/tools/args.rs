@@ -12,7 +12,7 @@ pub struct Args {
     #[arg(short = 'm', long, help = "Filter by protocol (TCP or UDP)")]
     pub mode: Option<String>,
 
-    #[arg(short = 'n', long = "process-name", help = "Filter by process name (partial match)")]
+    #[arg(short = 'n', long = "process-name", help = "Filter by process name (regular expression)")]
     pub process_name: Option<String>,
 
     #[arg(short = 'i', long, help = "Filter by process ID (PID)")]
