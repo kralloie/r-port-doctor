@@ -24,12 +24,6 @@ fn main() {
 
     get_sockets(&mut sockets, &args);
 
-    if args.resolve_hostname {
-        if !matches!(&args.mode, Some(m) if m.to_lowercase() == "udp") {
-            resolve_socket_table_addresses(&mut sockets);
-        }
-    }
-
     if let Some(fields) = &args.fields {
         let mut seen_fields = std::collections::HashSet::new();
         for field in fields {
@@ -46,6 +40,13 @@ fn main() {
     }
     
     Socket::filter_socket_table(&mut sockets, &args, argc);
+
+    if args.resolve_hostname {
+        if !matches!(&args.mode, Some(m) if m.to_lowercase() == "udp") {
+            resolve_socket_table_addresses(&mut sockets);
+        }
+    }
+
     Socket::sort_socket_table(&mut sockets, &args);
     if args.stats {
         print_socket_stats(&sockets);
