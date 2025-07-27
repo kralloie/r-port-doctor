@@ -29,7 +29,9 @@ pub fn resolve_socket_table_addresses(sockets: &mut Vec<Socket>) {
     sockets.iter().for_each(|s| {
         if s.protocol != "UDP" {
             if let Some(addr) = &s.remote_addr {
-                addresses_hash_set.insert(addr.clone());
+                if addr != "127.0.0.1" && addr != "0.0.0.0" {
+                    addresses_hash_set.insert(addr.clone());
+                }
             }   
         }
     });
@@ -64,9 +66,6 @@ pub fn resolve_socket_table_addresses(sockets: &mut Vec<Socket>) {
     sockets.iter_mut().for_each(|s| {
         if s.protocol != "UDP" {
             if let Some(addr) = &s.remote_addr {
-                if addr == "127.0.0.1" || addr == "0.0.0.0" {
-                    return
-                }
                 if let Some(resolved_addr) = DNS_CACHE.get(addr) {
                     s.remote_addr = Some(resolved_addr.clone());
                 }
