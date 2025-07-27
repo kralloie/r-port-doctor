@@ -39,7 +39,7 @@ r-port-doctor [OPTIONS]
 | `--older-than`        |       | Filter connections by uptime being older than provided seconds.                                             |
 | `--younger-than`      |       | Filter connections by uptime being younger than provided seconds.                                           |
 | `--fields`            |       | Show only the specified fields in the table.                                                                |
-| `--uptime-format`     |       | Specify uptime format (clock, human, hours, minutes, seconds).                                              |
+| `--uptime`            |       | Specify uptime format (clock, human, hours, minutes, seconds).                                              |
 | `--range`             |       | Filter rows by value ranges of the specified field.                                                         |
 | `--stats`             |       | Outputs various statistics related to the socket table instead of the table itself.                         |
 
