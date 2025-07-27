@@ -1,8 +1,8 @@
-# R-Port-Doctor
+# r-port-doctor
 
-R-Port-Doctor is a command-line tool for Windows that provides detailed information about network connections, similar to `netstat`. It allows you to filter, sort, and display information about TCP and UDP sockets, including the process ID (PID), process name, local and remote addresses, and connection state.
+r-port-doctor is a command-line tool for Windows that provides detailed information about network connections, similar to `netstat`. It allows you to filter, sort, and display information about TCP and UDP sockets, including the process ID (PID), process name, local and remote addresses, and connection state.
 
-## Features
+## Features ✨
 
 - **Detailed Socket Information:** Get a comprehensive view of TCP and UDP sockets on your system.
 - **Filtering:** Filter connections by port, process name, PID, protocol, address and connection state.
@@ -12,13 +12,13 @@ R-Port-Doctor is a command-line tool for Windows that provides detailed informat
 - **Uptime Information:** View the uptime of each connection in different formats.
 - **Statistics:** Get a summary of connection statistics, including total connections, TCP/UDP counts, and more.
 
-## Usage
+## Usage 🔧
 
 ```
 r-port-doctor [OPTIONS]
 ```
 
-### Options
+### Options ⚙️
 
 | Long                  | Short | Description                                                                                                 |
 | --------------------- | ----- | ----------------------------------------------------------------------------------------------------------- |
@@ -43,7 +43,7 @@ r-port-doctor [OPTIONS]
 | `--range`             |       | Filter rows by value ranges of the specified field.                                                         |
 | `--stats`             |       | Outputs various statistics related to the socket table instead of the table itself.                         |
 
-### Available Fields for Arguments
+### Available Fields for Arguments 📋
 
 - **`--sort`**:
   - `pid`
@@ -72,7 +72,7 @@ r-port-doctor [OPTIONS]
   - `local-address`
   - `remote-address`
 
-## Examples
+## Examples 💡
 
 - **List all TCP connections:**
   ```bash
@@ -108,7 +108,7 @@ r-port-doctor [OPTIONS]
   ```bash
   r-port-doctor --range remote-address 192.168.1.1 192.168.1.255
   ```
-## Installation
+## Installation 📦
 
 1. Clone the repository:
    ```bash
@@ -120,6 +120,6 @@ r-port-doctor [OPTIONS]
    ```
 3. The executable will be located in the `target/release` directory.
 
-## Contributing
+## Contributing 🤝
 
 Contributions are welcome! Please feel free to open an issue.
