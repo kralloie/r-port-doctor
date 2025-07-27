@@ -5,11 +5,11 @@ R-Port-Doctor is a command-line tool for Windows that provides detailed informat
 ## Features
 
 - **Detailed Socket Information:** Get a comprehensive view of TCP and UDP sockets on your system.
-- **Filtering:** Filter connections by port, process name, PID, protocol, and connection state.
-- **Sorting:** Sort the output by various fields, including PID, port, process name, and uptime.
+- **Filtering:** Filter connections by port, process name, PID, protocol, address and connection state.
+- **Sorting:** Sort the output by various fields, including PID, port, process name, address and uptime.
 - **JSON Output:** Output the results in JSON format for easy parsing and integration with other tools.
 - **Hostname Resolution:** Resolve remote IP addresses to hostnames.
-- **Uptime Information:** View the uptime of each connection.
+- **Uptime Information:** View the uptime of each connection in different formats.
 - **Statistics:** Get a summary of connection statistics, including total connections, TCP/UDP counts, and more.
 
 ## Usage
