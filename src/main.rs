@@ -1,5 +1,6 @@
 use clap::Parser;
 use r_port_doctor::tools::args::Args;
+use r_port_doctor::tools::config::{apply_config, get_config};
 use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::get_sockets::get_sockets;
 use r_port_doctor::tools::print_utils::OUTPUT_FIELDS;
@@ -11,13 +12,19 @@ fn main() {
         let _ = enable_ansi_support::enable_ansi_support();
     }
 
-    let args = match Args::try_parse() {
+    let mut args = match Args::try_parse() {
         Ok(args) => args,
         Err(e) => {
             eprintln!("{}", e);
             std::process::exit(0);
         }
     };
+
+    let config = get_config();
+    if let Some(conf) = config {
+        apply_config(conf, &mut args);
+    }
+    
     let argc = args.get_argc();
 
     let mut sockets: Vec<Socket> = Vec::new();
@@ -38,7 +45,7 @@ fn main() {
             }
         }
     }
-    
+
     Socket::filter_socket_table(&mut sockets, &args, argc);
 
     if args.resolve_hostname {
