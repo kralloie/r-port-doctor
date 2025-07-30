@@ -1,6 +1,6 @@
 use clap::Parser;
 use r_port_doctor::tools::args::Args;
-use r_port_doctor::tools::config::{apply_config, get_config};
+use r_port_doctor::tools::config::{apply_config, get_config, set_config_value};
 use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::get_sockets::get_sockets;
 use r_port_doctor::tools::print_utils::OUTPUT_FIELDS;
@@ -24,8 +24,16 @@ fn main() {
     if let Some(conf) = config {
         apply_config(conf, &mut args);
     }
-    
     let argc = args.get_argc();
+
+    if let Some(set_conf) = &args.set_config_value {
+        let update_config = set_config_value(set_conf[0].as_str(), set_conf.get(1));
+        match update_config {
+            Ok(()) => println!("Updated configuration: '{}' set to '{}'", set_conf[0], set_conf.get(1).unwrap_or(&String::from("none"))),
+            Err(e) => eprintln!("error: {}", e)
+        }
+        std::process::exit(0)
+    }
 
     let mut sockets: Vec<Socket> = Vec::new();
 

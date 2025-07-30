@@ -61,7 +61,10 @@ pub struct Args {
     pub range: Option<Vec<String>>,
 
     #[arg(long = "stats", help = "Outputs various statistics related to the socket table instead of the table itself")]
-    pub stats: bool
+    pub stats: bool,
+
+    #[arg(long = "set", help = "Set configuration file values, leave empty for resetting field value, e.g '--set port'", value_names = ["KEY", "VALUE"], num_args = 1..=2)]
+    pub set_config_value: Option<Vec<String>>
 }
 
 impl Args {

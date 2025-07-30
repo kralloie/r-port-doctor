@@ -1,3 +1,4 @@
+use regex::Regex;
 use serde::Deserialize;
 use std::fs;
 use std::io::Write;
@@ -61,4 +62,61 @@ pub fn apply_config(config: Config, args: &mut Args) {
     args.ip_version = args.ip_version.or(config.ip_version);
     args.local_address = args.local_address.clone().or(config.local_address);
     args.remote_address = args.remote_address.clone().or(config.remote_address);
+}
+
+// true = store as string | false = store as integer
+const CONFIG_KEYS: [(&'static str, bool); 9] =  [
+    ("port", false),
+    ("remote_port", false),
+    ("mode", true),
+    ("process_name", true),
+    ("pid", false),
+    ("state", true),
+    ("ip_version", false),
+    ("local_address", true),
+    ("remote_address", true),
+];
+
+pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()> {
+    let config_dir = match dirs::config_dir() {
+        Some(dir) => dir,
+        None => {
+            eprintln!("error: Config directory not found");
+            std::process::exit(0);
+        }
+    };
+    let config_dir_path = config_dir.join("r-port-doctor");
+    let config_file_path = config_dir_path.join("config.toml");
+
+    if !config_file_path.exists() {
+        if fs::create_dir_all(&config_dir_path).is_ok() {
+            if let Ok(mut file) = fs::File::create(&config_file_path) {
+                let _ = file.write_all(get_default_config_content().as_bytes());
+            }
+        }
+    }
+
+    let config_file_content = fs::read_to_string(&config_file_path)?;
+    let mut config_file_lines: Vec<String> = config_file_content.lines().map(String::from).collect();
+    let target_key_idx = CONFIG_KEYS.iter().position(|k| k.0 == key).unwrap_or_else(|| {
+        eprintln!("error: Invalid configuration key: '{}'\n\nUse '--help' to see available configurations or read the configuration file on 'AppData\\Roaming\\r-port-doctor\\config.toml'", key);
+        std::process::exit(0);
+    });
+    let regex = Regex::new(format!(r"^#?\s*{}\s*=.*", CONFIG_KEYS[target_key_idx].0).as_str()).unwrap();
+    config_file_lines.iter_mut().for_each(|line| {
+        if regex.is_match(line.trim()) {
+            if value.is_some() {
+                if CONFIG_KEYS[target_key_idx].1 {
+                    *line = format!("{} = \"{}\"", key, value.unwrap());
+                } else {
+                    *line = format!("{} = {}", key, value.unwrap());
+                }
+            } else {
+                *line = format!("#{} =", key);
+            }
+        }
+    });
+
+    let new_file_content = config_file_lines.join("\n");
+    fs::write(config_file_path, new_file_content)
 }
