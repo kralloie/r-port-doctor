@@ -24,14 +24,23 @@ fn get_default_config_content() -> String {
 # Uncomment and set the values you want to use as default.
 
 # port = 80
+
 # remote_port = 443
+
 # mode = "TCP"
+
 # process_name = "svchost.exe"
+
 # pid = 4
+
 # state = "ESTABLISHED"
+
 # ip_version = 4
+
 # local_address = "127.0.0.1"
+
 # remote_address = "0.0.0.0"
+
 # uptime_format = "human"
     "#.to_string()
 }
@@ -118,7 +127,7 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
                     *line = format!("{} = {}", key, value.unwrap());
                 }
             } else {
-                *line = format!("#{} =", key);
+                *line = format!("# {} =", key);
             }
         }
     });
@@ -131,7 +140,7 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
                 config_file_lines.push(format!("{} = {}", key, value.unwrap()));
             }
         } else {
-            config_file_lines.push(format!("#{} =", key));
+            config_file_lines.push(format!("# {} =", key));
         }
     }
 
