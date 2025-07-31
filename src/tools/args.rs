@@ -63,7 +63,7 @@ pub struct Args {
     #[arg(long = "stats", help = "Outputs various statistics related to the socket table instead of the table itself")]
     pub stats: bool,
 
-    #[arg(long = "set", help = "Set configuration file values, leave empty for resetting field value, e.g '--set port'", value_names = ["KEY", "VALUE"], num_args = 1..=2)]
+    #[arg(long = "set", help = "Set or reset a default value in the configuration file.\nTo set a value: --set <KEY> <VALUE> (e.g., --set port 8080)\nTo reset a value: --set <KEY> (e.g., --set port)", value_names = ["KEY", "VALUE"], num_args = 1..=2)]
     pub set_config_value: Option<Vec<String>>
 }
 

@@ -171,6 +171,11 @@ impl Socket {
     }
 
     pub fn print_socket_table(socket_table: &Vec<Socket>, args: &Args) {
+        if args.json {
+            println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
+            return
+        }
+
         let mut largest_file_name: usize = 0;
         let mut largest_local_addr: usize = 0;
         let mut largest_remote_addr: usize = 0;
@@ -196,15 +201,11 @@ impl Socket {
         widths[LOCAL_ADDR_IDX] = std::cmp::max(largest_local_addr + 2, LOCAL_ADDR_W);
         widths[REMOTE_ADDR_IDX] = std::cmp::max(largest_remote_addr + 2, REMOTE_ADDR_W);
 
-        if args.json {
-            println!("{}", serde_json::to_string_pretty(&socket_table).unwrap());
-        } else {
-            print_socket_table_header(&widths, args.compact, &args.fields);
-            for socket in socket_table{
-                print_socket_row(socket, &widths,args.compact, &args.fields, &args.uptime_format);
-            }
-            if !args.compact { print_table_line(&widths, &args.fields); }
+        print_socket_table_header(&widths, args.compact, &args.fields);
+        for socket in socket_table {
+            print_socket_row(socket, &widths,args.compact, &args.fields, &args.uptime_format);
         }
+        if !args.compact { print_table_line(&widths, &args.fields); }
     }
 }
 

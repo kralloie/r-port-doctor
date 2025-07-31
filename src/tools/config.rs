@@ -15,6 +15,7 @@ pub struct Config {
     pub ip_version: Option<u8>,
     pub local_address: Option<String>,
     pub remote_address: Option<String>,
+    pub uptime_format: Option<String>
 }
 
 fn get_default_config_content() -> String {
@@ -31,6 +32,7 @@ fn get_default_config_content() -> String {
 # ip_version = 4
 # local_address = "127.0.0.1"
 # remote_address = "0.0.0.0"
+# uptime_format = "human"
     "#.to_string()
 }
 
@@ -62,10 +64,11 @@ pub fn apply_config(config: Config, args: &mut Args) {
     args.ip_version = args.ip_version.or(config.ip_version);
     args.local_address = args.local_address.clone().or(config.local_address);
     args.remote_address = args.remote_address.clone().or(config.remote_address);
+    args.uptime_format = args.uptime_format.clone().or(config.uptime_format)
 }
 
 // true = store as string | false = store as integer
-const CONFIG_KEYS: [(&'static str, bool); 9] =  [
+const CONFIG_KEYS: [(&'static str, bool); 10] =  [
     ("port", false),
     ("remote_port", false),
     ("mode", true),
@@ -75,6 +78,7 @@ const CONFIG_KEYS: [(&'static str, bool); 9] =  [
     ("ip_version", false),
     ("local_address", true),
     ("remote_address", true),
+    ("uptime_format", true)
 ];
 
 pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()> {
@@ -103,8 +107,10 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
         std::process::exit(0);
     });
     let regex = Regex::new(format!(r"^#?\s*{}\s*=.*", CONFIG_KEYS[target_key_idx].0).as_str()).unwrap();
+    let mut found_line = false;
     config_file_lines.iter_mut().for_each(|line| {
         if regex.is_match(line.trim()) {
+            found_line = true;
             if value.is_some() {
                 if CONFIG_KEYS[target_key_idx].1 {
                     *line = format!("{} = \"{}\"", key, value.unwrap());
@@ -116,6 +122,18 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
             }
         }
     });
+
+    if !found_line {
+        if value.is_some() {
+            if CONFIG_KEYS[target_key_idx].1 {
+                config_file_lines.push(format!("{} = \"{}\"", key, value.unwrap()));
+            } else {
+                config_file_lines.push(format!("{} = {}", key, value.unwrap()));
+            }
+        } else {
+            config_file_lines.push(format!("#{} =", key));
+        }
+    }
 
     let new_file_content = config_file_lines.join("\n");
     fs::write(config_file_path, new_file_content)
