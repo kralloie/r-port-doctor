@@ -1,3 +1,4 @@
+use colored::Colorize;
 use regex::Regex;
 use serde::Deserialize;
 use std::fs;
@@ -63,17 +64,19 @@ pub fn get_config() -> Option<Config> {
     config
 }
 
-pub fn apply_config(config: Config, args: &mut Args) {
-    args.port = args.port.or(config.port);
-    args.remote_port = args.remote_port.or(config.remote_port);
-    args.mode = args.mode.clone().or(config.mode);
-    args.process_name = args.process_name.clone().or(config.process_name);
-    args.pid = args.pid.or(config.pid);
-    args.state = args.state.clone().or(config.state);
-    args.ip_version = args.ip_version.or(config.ip_version);
-    args.local_address = args.local_address.clone().or(config.local_address);
-    args.remote_address = args.remote_address.clone().or(config.remote_address);
-    args.uptime_format = args.uptime_format.clone().or(config.uptime_format)
+pub fn apply_config(config: Option<Config>, args: &mut Args) {
+    if let Some(config) = config {
+        args.port = args.port.or(config.port);
+        args.remote_port = args.remote_port.or(config.remote_port);
+        args.mode = args.mode.clone().or(config.mode);
+        args.process_name = args.process_name.clone().or(config.process_name);
+        args.pid = args.pid.or(config.pid);
+        args.state = args.state.clone().or(config.state);
+        args.ip_version = args.ip_version.or(config.ip_version);
+        args.local_address = args.local_address.clone().or(config.local_address);
+        args.remote_address = args.remote_address.clone().or(config.remote_address);
+        args.uptime_format = args.uptime_format.clone().or(config.uptime_format)
+    }
 }
 
 // true = store as string | false = store as integer
@@ -90,7 +93,7 @@ const CONFIG_KEYS: [(&'static str, bool); 10] =  [
     ("uptime_format", true)
 ];
 
-pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()> {
+fn verify_config_file() {
     let config_dir = match dirs::config_dir() {
         Some(dir) => dir,
         None => {
@@ -108,7 +111,39 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
             }
         }
     }
+}
 
+pub fn get_config_value(key: &Option<String>) {
+    if let Some(k) = key {
+        let config = get_config();
+        if let Some(conf) = config {
+            let value: Option<String> = match k.to_lowercase().as_str() {
+                "port" => conf.port.map(|v| v.to_string()),
+                "remote_port" =>  conf.remote_port.map(|v| v.to_string()),
+                "mode" => conf.mode,
+                "process_name" => conf.process_name,
+                "pid" => conf.pid.map(|v| v.to_string()),
+                "state" => conf.state,
+                "ip_version" => conf.ip_version.map(|v| v.to_string()),
+                "local_address" => conf.local_address,
+                "remote_address" => conf.remote_address,
+                "uptime_fromat" => conf.uptime_format,
+                _ => None
+            };
+            if let Some(v) = value {
+                println!("{}", v.bold().underline());
+            }
+        }
+        std::process::exit(0);
+    }
+}
+
+pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()> {
+    verify_config_file();
+    let config_file_path = dirs::config_dir()
+        .unwrap()
+        .join("r-port-doctor")
+        .join("config.toml");
     let config_file_content = fs::read_to_string(&config_file_path)?;
     let mut config_file_lines: Vec<String> = config_file_content.lines().map(String::from).collect();
     let target_key_idx = CONFIG_KEYS.iter().position(|k| k.0 == key).unwrap_or_else(|| {
@@ -146,4 +181,15 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
 
     let new_file_content = config_file_lines.join("\n");
     fs::write(config_file_path, new_file_content)
+}
+
+pub fn update_config(config_value: Option<Vec<String>>) {
+    if let Some(value) = config_value {
+        let update_config = set_config_value(value[0].as_str(), value.get(1));
+        match update_config {
+            Ok(()) => println!("Updated configuration: {} set to {}", value[0].bold().underline(), value.get(1).unwrap_or(&String::from("none")).bold().underline()),
+            Err(e) => eprintln!("error: {}", e)
+        }
+        std::process::exit(0)
+    }
 }

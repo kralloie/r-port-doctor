@@ -1,4 +1,5 @@
 use clap::{arg, Parser};
+use crate::tools::print_utils::OUTPUT_FIELDS;
 
 #[derive(Parser, Debug)]
 #[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool")]
@@ -64,7 +65,10 @@ pub struct Args {
     pub stats: bool,
 
     #[arg(long = "set", help = "Set or reset a default value in the configuration file.\nTo set a value: --set <KEY> <VALUE> (e.g., --set port 8080)\nTo reset a value: --set <KEY> (e.g., --set port)", value_names = ["KEY", "VALUE"], num_args = 1..=2)]
-    pub set_config_value: Option<Vec<String>>
+    pub set_config_value: Option<Vec<String>>,
+
+    #[arg(long = "get", help = "Get the default value of the specified field from the configuration file", value_name = "FIELD")]
+    pub get_config_value: Option<String>
 }
 
 impl Args {
@@ -80,5 +84,22 @@ impl Args {
         self.older_than.is_some() as usize +
         self.younger_than.is_some() as usize +
         self.range.is_some() as usize
+    }
+}
+
+pub fn validate_field_args(fields: Option<&Vec<String>>) {
+    if let Some(fields) = fields {
+        let mut seen_fields = std::collections::HashSet::new();
+        for field in fields {
+            let lower_field = field.to_lowercase();
+            if !seen_fields.insert(lower_field.clone()) {
+                eprintln!("error: Repeated field '{}'", field);
+                std::process::exit(0);
+            }
+            if !OUTPUT_FIELDS.contains(&lower_field.as_str()) {
+                eprintln!("error: Invalid field: '{}'\n\nAvailable fields:\n\n- pid\n- process_name\n- port\n- protocol\n- local_address\n- remote_address\n- state\n- uptime", field);
+                std::process::exit(0);
+            }
+        }
     }
 }
