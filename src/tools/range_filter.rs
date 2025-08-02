@@ -89,7 +89,10 @@ pub fn validate_range_args(range_args: &Vec<String>, ip_version: &Option<u8>) {
         "remote-port" => validate_range_fields::<u16>(range_fields_tuple),
         "uptime" => validate_range_fields::<u64>(range_fields_tuple),
         "local-address" | "remote-address" => (validate_address(&range_args[1], ip_version), validate_address(&range_args[2], ip_version)),
-        _ => std::process::exit(0)
+        _ => {
+            eprintln!("error: Invalid field specified: '{}'", range_args[0].underline());
+            std::process::exit(0);
+        }
     };
 
     if !min {
