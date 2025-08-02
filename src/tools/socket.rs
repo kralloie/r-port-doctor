@@ -1,7 +1,7 @@
 use std::{net::{IpAddr, Ipv4Addr, Ipv6Addr}, str::FromStr};
 use regex::Regex;
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
-use crate::tools::{args::Args, print::*, print_utils::*, range_filter::filter_range};
+use crate::tools::{args::Args, print::*, print_utils::*, range_filter::{filter_range, validate_range_args, MIN_IPV4, MIN_IPV6}, validate_address::validate_address};
 use serde::Serialize;
 
 //--------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ const REMOTE_ADDR_W: usize = 16;
 
 impl Socket {
     pub fn filter_socket_row (args: &Args, socket: &&Socket) -> bool {
-        
         if let Some(range_args) = &args.range {
             if !filter_range(range_args, socket, &args.ip_version) {
                 return false
@@ -121,6 +120,20 @@ impl Socket {
 
     pub fn filter_socket_table(socket_table: &mut Vec<Socket>, args: &Args, argc: usize) {
         if argc > 0 {
+            if matches!(&args.local_address, Some(addr) if !validate_address(addr, &args.ip_version)) {
+                eprintln!("error: Invalid local address provided: {}", args.local_address.clone().unwrap());
+                std::process::exit(0);
+            }
+            
+            if matches!(&args.remote_address, Some(addr) if !validate_address(addr, &args.ip_version)) {
+                eprintln!("error: Invalid remote address provided: {}", args.remote_address.clone().unwrap());
+                std::process::exit(0);
+            }
+
+            if let Some(range_args) = &args.range {
+                validate_range_args(range_args, &args.ip_version);
+            }
+
             *socket_table = socket_table.iter().filter(|s| Socket::filter_socket_row(&args, s)).cloned().collect();
         }
     }
@@ -140,11 +153,11 @@ impl Socket {
                     if matches!(args.ip_version, Some(version) if version == 6) {
                         Ipv6Addr::from_str(&s.local_addr)
                             .map(IpAddr::V6) 
-                            .unwrap_or(IpAddr::V6(Ipv6Addr::new(0,0,0,0,0,0,0,0)))
+                            .unwrap_or(IpAddr::V6(MIN_IPV6))
                     } else {
                         Ipv4Addr::from_str(&s.local_addr)
                             .map(IpAddr::V4)
-                            .unwrap_or(IpAddr::V4(Ipv4Addr::new(0,0,0,0)))
+                            .unwrap_or(IpAddr::V4(MIN_IPV4))
                     }
                 }),
                 "remote-address" => sort_by(order.as_str(), socket_table, |s| {
@@ -153,13 +166,13 @@ impl Socket {
                             .as_ref()
                             .and_then(|addr| Ipv6Addr::from_str(addr).ok())
                             .map(IpAddr::V6)
-                            .unwrap_or(IpAddr::V6(Ipv6Addr::new(0,0,0,0,0,0,0,0)))
+                            .unwrap_or(IpAddr::V6(MIN_IPV6))
                     } else {
                         s.remote_addr
                             .as_ref()
                             .and_then(|addr| Ipv4Addr::from_str(addr).ok())
                             .map(IpAddr::V4)
-                            .unwrap_or(IpAddr::V4(Ipv4Addr::new(0,0,0,0)))
+                            .unwrap_or(IpAddr::V4(MIN_IPV4))
                     }
                 }),
                 _ => {

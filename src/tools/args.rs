@@ -80,7 +80,7 @@ Available fields:
     - uptime (uses seconds)
     - local-address
     - remote-address",
-    value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
+    value_names = ["FIELD", "MIN", "MAX"], num_args = 3)]
     pub range: Option<Vec<String>>,
 
     #[arg(long = "stats", help = "Outputs various statistics related to the socket table instead of the table itself")]

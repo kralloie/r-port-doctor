@@ -13,3 +13,4 @@ pub mod stats;
 pub mod print_utils;
 pub mod connection_state_map;
 pub mod config;
+pub mod validate_address;
