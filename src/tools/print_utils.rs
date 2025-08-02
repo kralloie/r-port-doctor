@@ -59,7 +59,7 @@ pub fn get_formatted_uptime(uptime_arg: &Option<String>, socket_uptime: u64) -> 
             "minutes" => format!("{}m", socket_uptime / 60),
             "seconds" => format!("{}s", socket_uptime),
             _ => {
-                eprintln!("error: Invalid uptime format");
+                eprintln!("error: Invalid uptime format: '{}'\n\nAvailable formats:\n\n  - clock\n  - human\n  - hours\n  - minutes\n  - seconds", format.bold().underline());
                 std::process::exit(0);
             }
         }

@@ -147,7 +147,7 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
     let config_file_content = fs::read_to_string(&config_file_path)?;
     let mut config_file_lines: Vec<String> = config_file_content.lines().map(String::from).collect();
     let target_key_idx = CONFIG_KEYS.iter().position(|k| k.0 == key).unwrap_or_else(|| {
-        eprintln!("error: Invalid configuration key: '{}'\n\nUse '--help' to see available configurations or read the configuration file on 'AppData\\Roaming\\r-port-doctor\\config.toml'", key);
+        eprintln!("error: Invalid configuration key: '{}'\n\nUse '--help' to see available configurations or read the configuration file on 'AppData\\Roaming\\r-port-doctor\\config.toml'", key.bold().underline());
         std::process::exit(0);
     });
     let regex = Regex::new(format!(r"^#?\s*{}\s*=.*", CONFIG_KEYS[target_key_idx].0).as_str()).unwrap();

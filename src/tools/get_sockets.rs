@@ -1,3 +1,4 @@
+use colored::Colorize;
 use crate::tools::{args::Args, socket::Socket, udp_table::*, tcp_table::*};
 
 pub fn get_sockets(sockets: &mut Vec<Socket>, args: &Args) {
@@ -6,7 +7,7 @@ pub fn get_sockets(sockets: &mut Vec<Socket>, args: &Args) {
         Some(6) => (false, true),
         None => (true, false),
         _ => {
-            eprintln!("error: Invalid IP version\n\nValid versions:\n\n- 4 (IPv4)\n- 6 (IPv6)");
+            eprintln!("error: Invalid IP version\n\nValid versions:\n\n  - 4 (IPv4)\n  - 6 (IPv6)");
             std::process::exit(0);
         }
     };
@@ -16,7 +17,7 @@ pub fn get_sockets(sockets: &mut Vec<Socket>, args: &Args) {
         Some(m) if m == "udp" => (false, true),
         None => (true, true),
         Some(m) => {
-            eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n- TCP\n- UDP", m);
+            eprintln!("error: Invalid protocol: '{}'\n\nAvailable protocols:\n\n  - TCP\n  - UDP", m.bold().underline());
             std::process::exit(0);
         }
     };

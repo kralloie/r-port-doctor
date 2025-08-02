@@ -1,4 +1,5 @@
 use std::{net::{IpAddr, Ipv4Addr, Ipv6Addr}, str::FromStr};
+use colored::Colorize;
 use regex::Regex;
 use windows::Win32::Networking::WinSock::{AF_INET, AF_INET6};
 use crate::tools::{args::Args, print::*, print_utils::*, range_filter::{filter_range, validate_range_args, MIN_IPV4, MIN_IPV6}, validate_address::validate_address};
@@ -121,12 +122,12 @@ impl Socket {
     pub fn filter_socket_table(socket_table: &mut Vec<Socket>, args: &Args, argc: usize) {
         if argc > 0 {
             if matches!(&args.local_address, Some(addr) if !validate_address(addr, &args.ip_version)) {
-                eprintln!("error: Invalid local address provided: {}", args.local_address.clone().unwrap());
+                eprintln!("error: Invalid local address provided: '{}'", args.local_address.clone().unwrap().bold().underline());
                 std::process::exit(0);
             }
-            
+
             if matches!(&args.remote_address, Some(addr) if !validate_address(addr, &args.ip_version)) {
-                eprintln!("error: Invalid remote address provided: {}", args.remote_address.clone().unwrap());
+                eprintln!("error: Invalid remote address provided: '{}'", args.remote_address.clone().unwrap().bold().underline());
                 std::process::exit(0);
             }
 
@@ -176,7 +177,7 @@ impl Socket {
                     }
                 }),
                 _ => {
-                    eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n- pid (Process ID)\n- port (Local Port)\n- remote-port (Remote Port)\n- process-name (Process Name)\n- uptime (Time in seconds since connection started)", field);
+                    eprintln!("error: Invalid field argument: '{}'\n\nAvailable arguments:\n\n  - pid (Process ID)\n  - port (Local Port)\n  - remote-port (Remote Port)\n  - process-name (Process Name)\n  - uptime (Time in seconds since connection started)", field.bold().underline());
                     std::process::exit(0);
                 }
             }
@@ -227,7 +228,7 @@ fn sort_by<K: Ord, F: Fn(&Socket) -> K>(order: &str, table: &mut Vec<Socket>, ke
         "asc" => table.sort_by_key(key_field_fn),
         "desc" => table.sort_by_key(|s| std::cmp::Reverse(key_field_fn(s))),
         _ => {
-            eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order);
+            eprintln!("error: Invalid order argument: '{}'\n\nAvailable orders:\n  - asc (ascendant)\n  - desc (descendant)", order.bold().underline());
             std::process::exit(0);
         }
     }
