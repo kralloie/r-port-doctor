@@ -42,17 +42,23 @@ r-port-doctor [OPTIONS]
 | `--uptime`            |       | Specify uptime format (clock, human, hours, minutes, seconds).                                              |
 | `--range`             |       | Filter rows by value ranges of the specified field.                                                         |
 | `--stats`             |       | Outputs various statistics related to the socket table instead of the table itself.                         |
+| `--set`               |       | Set a default value to a field in the configuration file                                                    |
+| `--get`               |       | Get the specified value from the configuration file                                                         |
 
 ### Available Fields for Arguments 📋
 
 - **`--sort`**:
-  - `pid`
-  - `port`
-  - `remote-port`
-  - `process-name`
-  - `uptime`
-  - `local-address`
-  - `remote-address`
+  - `<ORDER>`
+    - `asc` (ascendant)
+    - `desc` (descendant)
+  - `<FIELD>`
+    - `pid`
+    - `port`
+    - `remote-port`
+    - `process-name`
+    - `uptime`
+    - `local-address`
+    - `remote-address`
 
 - **`--fields`**:
   - `pid`
@@ -71,6 +77,42 @@ r-port-doctor [OPTIONS]
   - `uptime` (in seconds)
   - `local-address`
   - `remote-address`
+ 
+### Configuration file 🧰
+The configuration file provides different fields for specifying a default value so the user can have default arguments to avoid having to add them when running the tool.  
+
+It is located on`C:/Users/username/AppData/Roaming/r-port-doctor/config.toml`
+
+Values can be edited manually by editing the `config.toml` with a text editor or by using the `--set <KEY> <VALUE>` argument when running the executable.
+
+Running `r-port-doctor.exe --set <KEY>` without any value will reset the default value by commenting the line.  
+
+Example of config.toml:  
+```
+# Default configuration for r-port-doctor
+# Uncomment and set the values you want to use as default.
+
+port = 61353
+
+remote_port = 443
+
+# mode = 
+
+# process_name = 
+
+# pid =
+
+state = "ESTABLISHED"
+
+ip_version = 4
+
+local_address = "127.0.0.1"
+
+remote_address = "0.0.0.0"
+
+uptime_format = "human"
+```
+
 
 ## Examples 💡
 
