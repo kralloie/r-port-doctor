@@ -37,7 +37,16 @@ pub struct Args {
     #[arg(long = "no-system", help = "Exclude system processes (e.g., PID 4) from the output")]
     pub no_system: bool,
 
-    #[arg(long = "sort", help = "Sort output in the specified order by the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - process-name\n  - uptime\n  - local-address\n  - remote-address", value_names = ["ORDER", "FIELD"], num_args = 2)]
+    #[arg(long = "sort", help = "Sort output in the specified order (asc/desc) by the specified field 
+Available fields:
+    - pid
+    - port
+    - remote-port
+    - process-name
+    - uptime
+    - local-address
+    - remote-address",
+    value_names = ["ORDER", "FIELD"], num_args = 2)]
     pub sort_by: Option<Vec<String>>,
 
     #[arg(long = "resolve-hostname", help = "Resolve remote IP addresses to hostnames using DNS (may take a few seconds for IPv4 addresses)")]
@@ -55,19 +64,47 @@ pub struct Args {
     #[arg(long = "fields", help = "Show only the specified fields in the table (all shown by default)", value_name = "FIELD", num_args = 1..=8)]
     pub fields: Option<Vec<String>>,
 
-    #[arg(long = "uptime", help = "Specify uptime format:\n  - clock (HH:MM:SS)\n  - human (DDd HHh MMm SSs)\n  - hours\n  - minutes\n  - seconds")]
+    #[arg(long = "uptime", help = "Specify uptime format:
+    - clock (HH:MM:SS)
+    - human (DDd HHh MMm SSs)
+    - hours
+    - minutes
+    - seconds")]
     pub uptime_format: Option<String>,
 
-    #[arg(long = "range", help = "Filter rows by value ranges of the specified field\nAvailable fields:\n  - pid\n  - port\n  - remote-port\n  - uptime (uses seconds)\n  - local-address\n  - remote-address", value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
+    #[arg(long = "range", help = "Filter rows by value ranges of the specified field
+Available fields:
+    - pid
+    - port  
+    - remote-port
+    - uptime (uses seconds)
+    - local-address
+    - remote-address",
+    value_names = ["FIELD", "MIN", "MAX"], num_args = 2..=3)]
     pub range: Option<Vec<String>>,
 
     #[arg(long = "stats", help = "Outputs various statistics related to the socket table instead of the table itself")]
     pub stats: bool,
 
-    #[arg(long = "set", help = "Set or reset a default value in the configuration file.\nTo set a value: --set <KEY> <VALUE> (e.g., --set port 8080)\nTo reset a value: --set <KEY> (e.g., --set port)", value_names = ["KEY", "VALUE"], num_args = 1..=2)]
+    #[arg(long = "set", help = "Set or reset a default value in the configuration file.
+To set a value: --set <KEY> <VALUE> (e.g., --set port 8080)
+To reset a value: --set <KEY> (e.g., --set port)
+Available fields:
+    - port
+    - remote_port
+    - mode
+    - process_name
+    - pid
+    - state
+    - local_address
+    - remote_address
+    - uptime_format", 
+    value_names = ["KEY", "VALUE"], num_args = 1..=2)]
     pub set_config_value: Option<Vec<String>>,
 
-    #[arg(long = "get", help = "Get the default value of the specified field from the configuration file", value_name = "FIELD")]
+    #[arg(long = "get", help = "Get the default value of the specified field from the configuration file
+To get a value: --get <KEY> (e.g, --get port)",
+    value_name = "KEY")]
     pub get_config_value: Option<String>
 }
 
