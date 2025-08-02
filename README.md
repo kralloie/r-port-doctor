@@ -42,8 +42,8 @@ r-port-doctor [OPTIONS]
 | `--uptime`            |       | Specify uptime format (clock, human, hours, minutes, seconds).                                              |
 | `--range`             |       | Filter rows by value ranges of the specified field.                                                         |
 | `--stats`             |       | Outputs various statistics related to the socket table instead of the table itself.                         |
-| `--set`               |       | Set a default value to a field in the configuration file                                                    |
-| `--get`               |       | Get the specified value from the configuration file                                                         |
+| `--set`               |       | Set a default value to a field in the configuration file.                                                   |
+| `--get`               |       | Get the specified value from the configuration file.                                                        |
 
 ### Available Fields for Arguments 📋
 
