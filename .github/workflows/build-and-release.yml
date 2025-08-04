@@ -48,6 +48,6 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: r-port-doctor/*.exe
+        files: ./*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
