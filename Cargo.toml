@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-enable-ansi-support = "0.2"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-clap = { version = "4", features = ["derive"] }
-windows = { version = "0.52.0", features = [
+enable-ansi-support = "~0.2.1"
+serde = { version = "~1.0.219", features = ["derive"] }
+serde_json = "~1.0.140"
+clap = { version = "~4.5.40", features = ["derive"] }
+windows = { version = "~0.52.0", features = [
     "Win32_Foundation",
     "Win32_Networking_WinSock",
     "Win32_System_ProcessStatus",
@@ -22,10 +22,10 @@ windows = { version = "0.52.0", features = [
     "Win32_System_SystemInformation",
     "Win32_System_Time"
 ]}
-colored = "2.1.0"
-dns-lookup = "2"
-dashmap = "5"
-strip-ansi-escapes = "0.1"
-regex = "1"
-toml = "0.8"
-dirs = "5"
+colored = "~2.2.0"
+dns-lookup = "~2.0.4"
+dashmap = "~5.5.3"
+strip-ansi-escapes = "~0.1.1"
+regex = "~1.11.1"
+toml = "~0.8.23"
+dirs = "~5.0.1"
