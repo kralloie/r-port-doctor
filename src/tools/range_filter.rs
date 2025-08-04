@@ -1,6 +1,5 @@
 use std::{net::{Ipv4Addr, Ipv6Addr}, str::FromStr};
-use colored::Colorize;
-use crate::tools::{socket::Socket, validate_address::validate_address};
+use crate::tools::{rpderror::RpdError, socket::Socket, validate_address::validate_address};
 
 pub const MIN_IPV4: Ipv4Addr = Ipv4Addr::new(0,0,0,0);
 pub const MAX_IPV4: Ipv4Addr = Ipv4Addr::new(255,255,255,255);
@@ -89,19 +88,9 @@ pub fn validate_range_args(range_args: &Vec<String>, ip_version: &Option<u8>) {
         "remote-port" => validate_range_fields::<u16>(range_fields_tuple),
         "uptime" => validate_range_fields::<u64>(range_fields_tuple),
         "local-address" | "remote-address" => (validate_address(&range_args[1], ip_version), validate_address(&range_args[2], ip_version)),
-        _ => {
-            eprintln!("error: Invalid <FIELD> value '{}' provided for range filtering", range_args[0].underline());
-            std::process::exit(0);
-        }
+        _ => RpdError::InvalidRangeFieldErr(range_args[0].clone()).handle()
     };
 
-    if !min {
-        eprintln!("error: Invalid <MIN> value '{}' provided for {} range filtering", range_args[1].underline(), range_args[0].cyan().bold());
-        std::process::exit(0);
-    }
-
-    if !max {
-        eprintln!("error: Invalid <MAX> value '{}' provided for {} range filtering", range_args[2].underline(), range_args[0].cyan().bold());
-        std::process::exit(0);
-    }
+    if !min { RpdError::InvalidRangeMinErr(range_args[1].clone(), range_args[0].clone()).handle(); }
+    if !max { RpdError::InvalidRangeMaxErr(range_args[2].clone(), range_args[0].clone()).handle(); }
 }

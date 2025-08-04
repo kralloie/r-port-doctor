@@ -3,6 +3,7 @@ use r_port_doctor::tools::args::{validate_field_args, Args};
 use r_port_doctor::tools::config::{apply_config, get_config, get_config_value, update_config};
 use r_port_doctor::tools::dns_lookup::resolve_socket_table_addresses;
 use r_port_doctor::tools::get_sockets::get_sockets;
+use r_port_doctor::tools::rpderror::RpdError;
 use r_port_doctor::tools::socket::{Socket};
 use r_port_doctor::tools::print::print_socket_stats;
 fn main() {     
@@ -13,10 +14,7 @@ fn main() {
 
     let mut args = match Args::try_parse() {
         Ok(args) => args,
-        Err(e) => {
-            eprintln!("{}", e);
-            std::process::exit(0);
-        }
+        Err(e) => RpdError::ParseArgsErr(e.to_string()).handle()
     };
     let config = get_config();
 

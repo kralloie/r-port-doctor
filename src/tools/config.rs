@@ -4,6 +4,7 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Write;
 use crate::tools::args::Args;
+use crate::tools::rpderror::RpdError;
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Config {
@@ -96,10 +97,7 @@ const CONFIG_KEYS: [(&'static str, bool); 10] =  [
 fn verify_config_file() {
     let config_dir = match dirs::config_dir() {
         Some(dir) => dir,
-        None => {
-            eprintln!("error: Config directory not found");
-            std::process::exit(0);
-        }
+        None => RpdError::ConfigDirNotFoundErr().handle()
     };
     let config_dir_path = config_dir.join("r-port-doctor");
     let config_file_path = config_dir_path.join("config.toml");
@@ -146,10 +144,7 @@ pub fn set_config_value(key: &str, value: Option<&String>) -> std::io::Result<()
         .join("config.toml");
     let config_file_content = fs::read_to_string(&config_file_path)?;
     let mut config_file_lines: Vec<String> = config_file_content.lines().map(String::from).collect();
-    let target_key_idx = CONFIG_KEYS.iter().position(|k| k.0 == key).unwrap_or_else(|| {
-        eprintln!("error: Invalid configuration key: '{}'\n\nUse '--help' to see available configurations or read the configuration file on 'AppData\\Roaming\\r-port-doctor\\config.toml'", key.bold().underline());
-        std::process::exit(0);
-    });
+    let target_key_idx = CONFIG_KEYS.iter().position(|k| k.0 == key).unwrap_or_else(|| RpdError::InvalidConfigKeyErr(key.to_string()).handle());
     let regex = Regex::new(format!(r"^#?\s*{}\s*=.*", CONFIG_KEYS[target_key_idx].0).as_str()).unwrap();
     let mut found_line = false;
     config_file_lines.iter_mut().for_each(|line| {
@@ -188,7 +183,7 @@ pub fn update_config(config_value: Option<Vec<String>>) {
         let update_config = set_config_value(value[0].as_str(), value.get(1));
         match update_config {
             Ok(()) => println!("Updated configuration: {} set to {}", value[0].bold().underline(), value.get(1).unwrap_or(&String::from("none")).bold().underline()),
-            Err(e) => eprintln!("error: {}", e)
+            Err(e) => RpdError::UpdateConfigErr(e.to_string()).handle()
         }
         std::process::exit(0)
     }

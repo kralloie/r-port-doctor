@@ -1,5 +1,6 @@
 use std::{collections::HashMap, path::Path, sync::LazyLock};
 use colored::{ColoredString, Colorize};
+use crate::tools::rpderror::RpdError;
 
 pub const OUTPUT_FIELDS: [&str; 8] = ["pid", "process-name", "port", "protocol", "local-address", "remote-address", "state", "uptime"];
 pub const PID_IDX: usize = 0;
@@ -58,10 +59,7 @@ pub fn get_formatted_uptime(uptime_arg: &Option<String>, socket_uptime: u64) -> 
             "hours" => format!("{}h", hours),
             "minutes" => format!("{}m", socket_uptime / 60),
             "seconds" => format!("{}s", socket_uptime),
-            _ => {
-                eprintln!("error: Invalid uptime format: '{}'\n\nAvailable formats:\n\n  - clock\n  - human\n  - hours\n  - minutes\n  - seconds", format.bold().underline());
-                std::process::exit(0);
-            }
+            _ => RpdError::InvalidUptimeFormatErr(format.clone()).handle()
         }
     } else {
         default_uptime_str

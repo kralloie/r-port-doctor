@@ -1,6 +1,5 @@
 use clap::{arg, Parser};
-use colored::Colorize;
-use crate::tools::print_utils::OUTPUT_FIELDS;
+use crate::tools::{print_utils::OUTPUT_FIELDS, rpderror::RpdError};
 
 #[derive(Parser, Debug)]
 #[command(name = "r-port-doctor", version, about = "Port debug and diagnostic tool")]
@@ -130,14 +129,8 @@ pub fn validate_field_args(fields: Option<&Vec<String>>) {
         let mut seen_fields = std::collections::HashSet::new();
         for field in fields {
             let lower_field = field.to_lowercase();
-            if !seen_fields.insert(lower_field.clone()) {
-                eprintln!("error: Repeated field '{}'", field.bold().underline());
-                std::process::exit(0);
-            }
-            if !OUTPUT_FIELDS.contains(&lower_field.as_str()) {
-                eprintln!("error: Invalid field: '{}'\n\nAvailable fields:\n\n  - pid\n  - process_name\n  - port\n  - protocol\n  - local_address\n  - remote_address\n  - state\n  - uptime", field.bold().underline());
-                std::process::exit(0);
-            }
+            if !seen_fields.insert(lower_field.clone()) { RpdError::RepeatedFieldArgErr(field.clone()).handle(); }
+            if !OUTPUT_FIELDS.contains(&lower_field.as_str()) { RpdError::InvalidFieldArgErr(field.clone()).handle(); }
         }
     }
 }
