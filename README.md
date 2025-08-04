@@ -152,6 +152,10 @@ uptime_format = "human"
   ```
 ## Installation 📦
 
+### From source
+To build from source, you need to have the [Rust toolchain](https://www.rust-lang.org/tools/install) installed.  
+Ensure you also install the "C++ build tools" when prompted by the `rustup` installer, as this project depends on the Windows API.
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/kralloie/r-port-doctor.git
@@ -161,6 +165,19 @@ uptime_format = "human"
    cargo build --release
    ```
 3. The executable will be located in the `target/release` directory.
+
+## Dependencies
+- [serde](https://crates.io/crates/serde)
+- [serde_json](https://crates.io/crates/serde_json)
+- [clap](https://crates.io/crates/clap)
+- [windows](https://crates.io/crates/windows)
+- [colored](https://crates.io/crates/colored)
+- [dns-lookup](https://crates.io/crates/dns-lookup)
+- [dashmap](https.crates.io/crates/dashmap)
+- [strip-ansi-escapes](https://crates.io/crates/strip-ansi-escapes)
+- [regex](https://crates.io/crates/regex)
+- [toml](https://crates.io/crates/toml)
+- [dirs](https://crates.io/crates/dirs)
 
 ## Contributing 🤝
 
